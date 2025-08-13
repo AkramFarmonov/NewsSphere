@@ -36,7 +36,7 @@ interface AdminStats {
 }
 
 export default function AdminPage() {
-  const [selectedCategory, setSelectedCategory] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("all");
   const [newArticle, setNewArticle] = useState({
     title: "",
     description: "",
@@ -172,7 +172,7 @@ export default function AdminPage() {
     totalSubscribers: newsletters.length
   };
 
-  const filteredArticles = selectedCategory 
+  const filteredArticles = selectedCategory && selectedCategory !== "all"
     ? articles.filter(article => article.categoryId === selectedCategory)
     : articles;
 
@@ -290,7 +290,7 @@ export default function AdminPage() {
                     <SelectValue placeholder="Kategoriya bo'yicha filtrlash" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Barcha kategoriyalar</SelectItem>
+                    <SelectItem value="all">Barcha kategoriyalar</SelectItem>
                     {categories.map((category) => (
                       <SelectItem key={category.id} value={category.id}>
                         {category.name}
