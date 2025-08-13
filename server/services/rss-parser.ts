@@ -1,0 +1,175 @@
+import { parseStringPromise } from 'xml2js';
+import { storage } from '../storage';
+import type { InsertArticle } from '@shared/schema';
+
+interface RssItem {
+  title: string[];
+  description?: string[];
+  link: string[];
+  pubDate: string[];
+  'media:content'?: Array<{ $: { url: string } }>;
+  enclosure?: Array<{ $: { url: string, type: string } }>;
+}
+
+interface RssChannel {
+  title: string[];
+  description?: string[];
+  item: RssItem[];
+}
+
+interface RssFeed {
+  rss: {
+    channel: RssChannel[];
+  };
+}
+
+export class RssParser {
+  private async fetchFeedContent(url: string): Promise<string> {
+    try {
+      const response = await fetch(url, {
+        headers: {
+          'User-Agent': 'RealNews RSS Parser 1.0'
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      return await response.text();
+    } catch (error) {
+      console.error(`Error fetching RSS feed from ${url}:`, error);
+      throw error;
+    }
+  }
+
+  private createSlug(title: string): string {
+    return title
+      .toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, '')
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-')
+      .trim()
+      .substring(0, 50);
+  }
+
+  private extractImageUrl(item: RssItem): string | undefined {
+    // Try to get image from media:content
+    if (item['media:content'] && item['media:content'][0]) {
+      return item['media:content'][0].$.url;
+    }
+    
+    // Try to get image from enclosure
+    if (item.enclosure && item.enclosure[0] && item.enclosure[0].$.type?.startsWith('image/')) {
+      return item.enclosure[0].$.url;
+    }
+    
+    // Try to extract image from description
+    if (item.description && item.description[0]) {
+      const imgMatch = item.description[0].match(/<img[^>]+src="([^">]+)"/);
+      if (imgMatch) {
+        return imgMatch[1];
+      }
+    }
+    
+    return undefined;
+  }
+
+  private cleanContent(content: string): string {
+    // Remove HTML tags and normalize whitespace
+    return content
+      .replace(/<[^>]*>/g, '')
+      .replace(/&[^;]+;/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  async parseFeed(feedUrl: string, categoryId: string, sourceName: string): Promise<InsertArticle[]> {
+    try {
+      const xmlContent = await this.fetchFeedContent(feedUrl);
+      const parsed: RssFeed = await parseStringPromise(xmlContent);
+      
+      if (!parsed.rss?.channel?.[0]?.item) {
+        console.warn(`No items found in RSS feed: ${feedUrl}`);
+        return [];
+      }
+      
+      const items = parsed.rss.channel[0].item;
+      const articles: InsertArticle[] = [];
+      
+      for (const item of items) {
+        if (!item.title?.[0] || !item.link?.[0]) {
+          continue;
+        }
+        
+        const title = this.cleanContent(item.title[0]);
+        const slug = this.createSlug(title);
+        
+        // Check if article already exists by slug
+        const existingArticle = await storage.getArticleBySlug(slug);
+        if (existingArticle) {
+          continue;
+        }
+        
+        const description = item.description?.[0] 
+          ? this.cleanContent(item.description[0]).substring(0, 300)
+          : undefined;
+        
+        const content = item.description?.[0] 
+          ? this.cleanContent(item.description[0])
+          : undefined;
+        
+        const imageUrl = this.extractImageUrl(item);
+        
+        const publishedAt = item.pubDate?.[0] 
+          ? new Date(item.pubDate[0])
+          : new Date();
+        
+        const article: InsertArticle = {
+          title,
+          slug,
+          description,
+          content,
+          imageUrl,
+          sourceUrl: item.link[0],
+          sourceName,
+          categoryId,
+          publishedAt,
+          isBreaking: "false",
+          isFeatured: "false"
+        };
+        
+        articles.push(article);
+      }
+      
+      return articles;
+      
+    } catch (error) {
+      console.error(`Error parsing RSS feed ${feedUrl}:`, error);
+      return [];
+    }
+  }
+
+  async fetchAllFeeds(): Promise<void> {
+    const feeds = await storage.getActiveRssFeeds();
+    
+    for (const feed of feeds) {
+      try {
+        console.log(`Fetching RSS feed: ${feed.name}`);
+        const articles = await this.parseFeed(feed.url, feed.categoryId, feed.name);
+        
+        for (const article of articles) {
+          await storage.createArticle(article);
+        }
+        
+        await storage.updateRssFeedLastFetched(feed.id);
+        console.log(`Successfully processed ${articles.length} articles from ${feed.name}`);
+        
+      } catch (error) {
+        console.error(`Failed to process RSS feed ${feed.name}:`, error);
+      }
+    }
+  }
+}
+
+export const rssParser = new RssParser();
