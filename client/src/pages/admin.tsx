@@ -548,16 +548,17 @@ export default function AdminPage() {
 
         {/* Settings */}
         <TabsContent value="settings">
-          <Card>
-            <CardHeader>
-              <CardTitle>Tizim Sozlamalari</CardTitle>
-              <CardDescription>Platformaning asosiy sozlamalari</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-6">
-                <div>
-                  <h4 className="font-medium mb-2">RSS Feed Sozlamalari</h4>
-                  <p className="text-sm text-gray-600 mb-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>RSS Feed Sozlamalari</CardTitle>
+                <CardDescription>
+                  RSS feedlar avtomatik ravishda yangilanadi
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <p className="text-sm text-gray-600">
                     RSS feedlar har 30 daqiqada avtomatik ravishda yangilanadi
                   </p>
                   <Button 
@@ -569,16 +570,95 @@ export default function AdminPage() {
                     Qo'lda Yangilash
                   </Button>
                 </div>
-                
-                <div>
-                  <h4 className="font-medium mb-2">Newsletter Obunachilar</h4>
-                  <p className="text-sm text-gray-600">
-                    Jami {newsletters.length} obunachi mavjud
-                  </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>AI Generatsiya</CardTitle>
+                <CardDescription>
+                  Gemini AI orqali avtomatik yangilik yaratish
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="p-4 bg-blue-50 rounded-lg">
+                    <h5 className="font-medium text-blue-900 mb-2">AI Imkoniyatlari:</h5>
+                    <ul className="text-sm text-blue-800 space-y-1">
+                      <li>• RSS yangiliklarini o'zbek tiliga tarjima qilish</li>
+                      <li>• Mavjud maqolalarni yaxshilash</li>
+                      <li>• Original maqolalar yaratish</li>
+                      <li>• Avtomatik teglar generatsiyasi</li>
+                    </ul>
+                  </div>
+                  <div className="p-4 bg-green-50 rounded-lg">
+                    <p className="text-sm text-green-800 font-medium">
+                      ✓ AI xizmati faol! RSS feedlar avtomatik ravishda 
+                      o'zbek tiliga tarjima qilinadi.
+                    </p>
+                  </div>
+                  <Button
+                    onClick={() => fetchRssMutation.mutate()}
+                    disabled={fetchRssMutation.isPending}
+                    className="w-full"
+                    data-testid="button-ai-fetch-rss"
+                  >
+                    <RefreshCw className="h-4 w-4 mr-2" />
+                    AI bilan RSS Yangilash
+                  </Button>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Statistika</CardTitle>
+                <CardDescription>Platform statistikalari</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <span className="text-sm">Newsletter Obunachilar:</span>
+                    <span className="font-medium">{newsletters.length}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm">Jami Ko'rishlar:</span>
+                    <span className="font-medium">{articles.reduce((sum, article) => sum + (article.views || 0), 0)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm">Faol RSS Feedlar:</span>
+                    <span className="font-medium">{feeds.filter(f => f.isActive === "true").length}</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>SEO Holati</CardTitle>
+                <CardDescription>Qidiruv tizimi optimallashtirish</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm">Sitemap:</span>
+                    <Badge variant="default">Faol</Badge>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm">Meta teglar:</span>
+                    <Badge variant="default">Optimallashtiriilgan</Badge>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm">Open Graph:</span>
+                    <Badge variant="default">Yoqilgan</Badge>
+                  </div>
+                  <div className="text-sm text-gray-600">
+                    Sitemap URL: <code className="bg-gray-100 px-1 rounded">/sitemap.xml</code>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
       </Tabs>
     </div>

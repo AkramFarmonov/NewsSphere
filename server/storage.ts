@@ -40,6 +40,7 @@ export interface IStorage {
   // Admin methods
   updateArticleFeatured(id: string, isFeatured: string): Promise<void>;
   updateArticleBreaking(id: string, isBreaking: string): Promise<void>;
+  getCategoryById(id: string): Promise<Category | undefined>;
 }
 
 export class MemStorage implements IStorage {
@@ -94,17 +95,17 @@ export class MemStorage implements IStorage {
       { url: "https://uza.uz/rss", name: "UzA", categorySlug: "ozbekiston" },
       { url: "https://daryo.uz/rss", name: "Daryo.uz", categorySlug: "ozbekiston" },
       
-      // Dunyo
-      { url: "https://feeds.bbci.co.uk/news/world/rss.xml", name: "BBC World", categorySlug: "dunyo" },
-      { url: "https://rss.cnn.com/rss/edition.rss", name: "CNN", categorySlug: "dunyo" },
+      // Dunyo (working RSS feeds)
+      { url: "https://feeds.skynews.com/feeds/rss/world.xml", name: "Sky News World", categorySlug: "dunyo" },
+      { url: "https://feeds.reuters.com/reuters/worldNews", name: "Reuters World", categorySlug: "dunyo" },
       
       // Sport
       { url: "https://www.championat.com/rss/news.xml", name: "Championat.com", categorySlug: "sport" },
       { url: "https://sport24.ru/rss/news.xml", name: "Sport24", categorySlug: "sport" },
       
       // Texnologiya
-      { url: "https://techcrunch.com/feed/", name: "TechCrunch", categorySlug: "texnologiya" },
-      { url: "https://www.theverge.com/rss/index.xml", name: "The Verge", categorySlug: "texnologiya" },
+      { url: "https://feeds.techcrunch.com/TechCrunch/", name: "TechCrunch", categorySlug: "texnologiya" },
+      { url: "https://feeds.reuters.com/reuters/technologyNews", name: "Reuters Tech", categorySlug: "texnologiya" },
       
       // Iqtisodiyot
       { url: "https://www.reuters.com/arc/outboundfeeds/rss/tag/business-news/?outputType=xml", name: "Reuters Business", categorySlug: "iqtisodiyot" },
@@ -441,6 +442,10 @@ export class MemStorage implements IStorage {
       article.isBreaking = isBreaking;
       this.articles.set(id, article);
     }
+  }
+
+  async getCategoryById(id: string): Promise<Category | undefined> {
+    return this.categories.get(id);
   }
 }
 

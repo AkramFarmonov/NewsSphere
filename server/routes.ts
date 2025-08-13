@@ -232,6 +232,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // AI Content Generation endpoints
+  app.post("/api/admin/ai/improve-article/:id", async (req, res) => {
+    try {
+      if (!process.env.GEMINI_API_KEY) {
+        return res.status(400).json({ error: "GEMINI_API_KEY not configured" });
+      }
+
+      const { id } = req.params;
+      const article = await storage.getArticleById(id);
+      
+      if (!article) {
+        return res.status(404).json({ error: "Article not found" });
+      }
+
+      const { aiGenerator } = await import("./services/ai-generator");
+      const improved = await aiGenerator.improveExistingArticle(article);
+      
+      res.json(improved);
+    } catch (error) {
+      console.error("AI improvement error:", error);
+      res.status(500).json({ error: "Failed to improve article with AI" });
+    }
+  });
+
+  app.post("/api/admin/ai/generate-article", async (req, res) => {
+    try {
+      if (!process.env.GEMINI_API_KEY) {
+        return res.status(400).json({ error: "GEMINI_API_KEY not configured" });
+      }
+
+      const { categoryId } = req.body;
+      const category = await storage.getCategoryById(categoryId);
+      
+      if (!category) {
+        return res.status(404).json({ error: "Category not found" });
+      }
+
+      const { aiGenerator } = await import("./services/ai-generator");
+      const generated = await aiGenerator.generateOriginalArticle(category);
+      
+      res.json(generated);
+    } catch (error) {
+      console.error("AI generation error:", error);
+      res.status(500).json({ error: "Failed to generate article with AI" });
+    }
+  });
+
   // Get sitemap for SEO
   app.get("/sitemap.xml", async (_req, res) => {
     try {

@@ -1,5 +1,6 @@
 import { parseStringPromise } from 'xml2js';
 import { storage } from '../storage';
+import { aiGenerator } from './ai-generator';
 import type { InsertArticle } from '@shared/schema';
 
 interface RssItem {
@@ -125,11 +126,40 @@ export class RssParser {
           ? new Date(item.pubDate[0])
           : new Date();
         
-        const article: InsertArticle = {
+        // AI orqali maqolani yaxshilash va tarjima qilish
+        let enhancedArticle: { title: string; slug: string; description?: string; content?: string } = {
           title,
           slug,
           description,
-          content,
+          content
+        };
+
+        try {
+          if (process.env.GEMINI_API_KEY && content && aiGenerator) {
+            const category = await storage.getCategoryById(categoryId);
+            if (category) {
+              const enhanced = await aiGenerator.translateAndRewriteArticle(
+                title,
+                content,
+                category
+              );
+              enhancedArticle = {
+                title: enhanced.title,
+                slug: enhanced.slug,
+                description: enhanced.description,
+                content: enhanced.content
+              };
+            }
+          }
+        } catch (error) {
+          console.error("AI enhancement failed, using original content:", error);
+        }
+
+        const article: InsertArticle = {
+          title: enhancedArticle.title,
+          slug: enhancedArticle.slug,
+          description: enhancedArticle.description,
+          content: enhancedArticle.content,
           imageUrl,
           sourceUrl: item.link[0],
           sourceName,
