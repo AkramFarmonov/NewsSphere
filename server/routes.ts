@@ -156,13 +156,79 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Manual RSS feed fetch (for admin/development)
+  // Admin routes
   app.post("/api/admin/fetch-rss", async (_req, res) => {
     try {
       await rssParser.fetchAllFeeds();
       res.json({ message: "RSS feeds fetched successfully" });
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch RSS feeds" });
+    }
+  });
+
+  // Get all RSS feeds for admin
+  app.get("/api/admin/rss-feeds", async (_req, res) => {
+    try {
+      const feeds = await storage.getAllRssFeeds();
+      res.json(feeds);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch RSS feeds" });
+    }
+  });
+
+  // Create new RSS feed
+  app.post("/api/admin/rss-feeds", async (req, res) => {
+    try {
+      const feedData = req.body;
+      const feed = await storage.createRssFeed(feedData);
+      res.status(201).json(feed);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to create RSS feed" });
+    }
+  });
+
+  // Get all newsletters for admin
+  app.get("/api/admin/newsletters", async (_req, res) => {
+    try {
+      const newsletters = await storage.getAllNewsletters();
+      res.json(newsletters);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch newsletters" });
+    }
+  });
+
+  // Create new article (admin)
+  app.post("/api/admin/articles", async (req, res) => {
+    try {
+      const articleData = req.body;
+      const article = await storage.createArticle(articleData);
+      res.status(201).json(article);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to create article" });
+    }
+  });
+
+  // Toggle article featured status
+  app.patch("/api/admin/articles/:id/featured", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { isFeatured } = req.body;
+      await storage.updateArticleFeatured(id, isFeatured);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to update article" });
+    }
+  });
+
+  // Toggle article breaking status
+  app.patch("/api/admin/articles/:id/breaking", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { isBreaking } = req.body;
+      await storage.updateArticleBreaking(id, isBreaking);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to update article" });
     }
   });
 
@@ -209,6 +275,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       res.status(500).json({ error: "Failed to generate sitemap" });
     }
+  });
+
+  // Health check endpoint for deployment
+  app.get("/api/health", (_req, res) => {
+    res.json({ 
+      status: "ok",
+      timestamp: new Date().toISOString(),
+      version: "1.0.0"
+    });
   });
 
   const httpServer = createServer(app);
