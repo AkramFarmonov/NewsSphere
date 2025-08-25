@@ -196,6 +196,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get related articles by slug
+  app.get("/api/articles/slug/:slug/related", async (req, res) => {
+    try {
+      const { slug } = req.params;
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : 3;
+      const relatedArticles = await storage.getRelatedArticles(slug, limit);
+      res.json(relatedArticles);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch related articles" });
+    }
+  });
+
   // Like/unlike article
   app.post("/api/articles/:id/like", async (req, res) => {
     try {

@@ -51,3 +51,10 @@ export function useSearchArticles(query: string, limit = 20) {
     enabled: !!query && query.length > 0,
   });
 }
+
+export function useRelatedArticles(slug: string, limit = 3) {
+  return useQuery<ArticleWithCategory[]>({
+    queryKey: ["/api/articles/slug", slug, "related", { limit }],
+    enabled: !!slug,
+  });
+}

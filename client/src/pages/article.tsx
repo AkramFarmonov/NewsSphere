@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useParams, Link } from "wouter";
 import { ChevronRight, Home, Clock, Eye, Heart, Share2, User, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useArticleBySlug, useCategoryArticles } from "@/hooks/use-news";
+import { useArticleBySlug, useRelatedArticles } from "@/hooks/use-news";
 import NewsCard from "@/components/news-card";
 import Sidebar from "@/components/sidebar";
 import { updateSEOTags } from "@/lib/seo";
@@ -18,11 +18,7 @@ export default function ArticlePage() {
   const queryClient = useQueryClient();
 
   const { data: article, isLoading, error } = useArticleBySlug(slug);
-  const { data: relatedArticles = [] } = useCategoryArticles(
-    article?.category.slug || "", 
-    4, 
-    0
-  );
+  const { data: relatedArticles = [] } = useRelatedArticles(slug, 3);
 
   const likeMutation = useMutation({
     mutationFn: (increment: boolean) => apiRequest("POST", `/api/articles/${article?.id}/like`, { increment }),
@@ -135,8 +131,6 @@ export default function ArticlePage() {
       </div>
     );
   }
-
-  const filteredRelatedArticles = relatedArticles.filter(a => a.id !== article.id).slice(0, 3);
 
   return (
     <div data-testid="article-page">
@@ -273,11 +267,11 @@ export default function ArticlePage() {
             </div>
 
             {/* Related Articles */}
-            {filteredRelatedArticles.length > 0 && (
+            {relatedArticles.length > 0 && (
               <section className="mt-12 pt-8 border-t border-gray-200" data-testid="related-articles">
                 <h2 className="text-2xl font-bold text-gray-900 mb-6">Shunga o'xshash maqolalar</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
-                  {filteredRelatedArticles.map((relatedArticle) => (
+                  {relatedArticles.map((relatedArticle) => (
                     <NewsCard
                       key={relatedArticle.id}
                       article={relatedArticle}

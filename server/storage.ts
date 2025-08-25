@@ -26,6 +26,7 @@ export interface IStorage {
   updateArticleLikes(id: string, increment: boolean): Promise<void>;
   searchArticles(query: string, limit?: number): Promise<ArticleWithCategory[]>;
   getArticleBySourceUrl(sourceUrl: string): Promise<ArticleWithCategory | undefined>;
+  getRelatedArticles(slug: string, limit?: number): Promise<ArticleWithCategory[]>;
 
   // RSS Feed methods
   getAllRssFeeds(): Promise<RssFeed[]>;
@@ -201,8 +202,8 @@ export class MemStorage implements IStorage {
           id: randomUUID(),
           title: articleData.title,
           slug: articleData.slug,
-          description: articleData.description ?? null,
-          content: articleData.content ?? null,
+          description: articleData.description || null,
+          content: articleData.content || null,
           imageUrl: articleData.imageUrl ?? null,
           sourceUrl: articleData.sourceUrl,
           sourceName: articleData.sourceName,
@@ -375,6 +376,27 @@ export class MemStorage implements IStorage {
     
     const enriched = await this.enrichArticlesWithCategories([article]);
     return enriched[0];
+  }
+
+  async getRelatedArticles(slug: string, limit = 3): Promise<ArticleWithCategory[]> {
+    const currentArticle = Array.from(this.articles.values()).find(a => a.slug === slug);
+    if (!currentArticle) return [];
+
+    // Find articles in the same category, excluding the current article
+    const relatedArticles = Array.from(this.articles.values())
+      .filter(article => 
+        article.categoryId === currentArticle.categoryId && 
+        article.id !== currentArticle.id
+      )
+      .sort((a, b) => {
+        // Sort by combination of views and likes (engagement score)
+        const scoreA = (a.views || 0) + (a.likes || 0) * 2;
+        const scoreB = (b.views || 0) + (b.likes || 0) * 2;
+        return scoreB - scoreA;
+      })
+      .slice(0, limit);
+
+    return this.enrichArticlesWithCategories(relatedArticles);
   }
 
   private async enrichArticlesWithCategories(articles: Article[]): Promise<ArticleWithCategory[]> {

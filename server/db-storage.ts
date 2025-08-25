@@ -270,6 +270,38 @@ export class DbStorage implements IStorage {
     };
   }
 
+  async getRelatedArticles(slug: string, limit = 3): Promise<ArticleWithCategory[]> {
+    // First get the current article to find its category
+    const currentArticle = await this.db
+      .select()
+      .from(articles)
+      .where(eq(articles.slug, slug));
+
+    if (!currentArticle[0]) return [];
+
+    // Find related articles in the same category, excluding the current article
+    const result = await this.db
+      .select({
+        article: articles,
+        category: categories
+      })
+      .from(articles)
+      .innerJoin(categories, eq(articles.categoryId, categories.id))
+      .where(
+        and(
+          eq(articles.categoryId, currentArticle[0].categoryId),
+          sql`${articles.id} != ${currentArticle[0].id}`
+        )
+      )
+      .orderBy(desc(sql`${articles.views} + ${articles.likes} * 2`))
+      .limit(limit);
+
+    return result.map(row => ({
+      ...row.article,
+      category: row.category
+    }));
+  }
+
   // RSS Feed methods
   async getAllRssFeeds(): Promise<RssFeed[]> {
     return await this.db.select().from(rssFeeds).orderBy(asc(rssFeeds.name));
