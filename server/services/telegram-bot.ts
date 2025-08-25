@@ -58,21 +58,17 @@ export class TelegramBot {
   private formatArticleMessage(article: ArticleWithCategory, siteUrl: string = "https://realnews.uz"): string {
     const categoryIcon = this.getCategoryIcon(article.category.name);
     const articleUrl = `${siteUrl}/article/${article.slug}`;
+    const shortUrl = `${siteUrl.replace('https://', '')}/r/${article.id.substring(0, 8)}`;
     
-    // Telegram HTML formatda xabar
+    // Professional va toza format - kanallaringiz kabi
     const message = `
-${categoryIcon} <b>${article.category.name}</b>
-
 <b>${article.title}</b>
 
-${article.description ? article.description.substring(0, 200) + "..." : ""}
+${article.description ? article.description.substring(0, 280) + "..." : ""}
 
-<a href="${articleUrl}">📖 To'liq o'qish</a>
+👉 <a href="${articleUrl}">${shortUrl}</a>
 
-<i>📅 ${this.formatDate(article.publishedAt)}</i>
-<i>👁 ${article.views} ko'rishlar</i> • <i>❤️ ${article.likes} yoqtirish</i>
-
-#${article.category.slug} #RealNews
+${categoryIcon} <b>${article.category.name}</b> | ${this.formatDate(article.publishedAt)}
 `.trim();
 
     return message;
