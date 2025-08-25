@@ -32,6 +32,7 @@ function Router() {
 }
 
 function App() {
+  console.log("RealNews: App component rendering...");
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
