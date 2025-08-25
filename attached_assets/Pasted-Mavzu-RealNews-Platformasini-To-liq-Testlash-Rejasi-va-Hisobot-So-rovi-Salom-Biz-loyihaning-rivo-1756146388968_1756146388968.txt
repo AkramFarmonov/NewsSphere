@@ -1,0 +1,90 @@
+Mavzu: "RealNews" Platformasini To'liq Testlash Rejasi va Hisobot So'rovi
+Salom! Biz loyihaning rivojlanishida juda katta masofani bosib o'tdik. Endi, keyingi bosqichlarga o'tishdan oldin, barcha amalga oshirilgan ishlarning sifatini va barqarorligini tekshirish uchun tizimni to'liq sinovdan o'tkazishimiz kerak.
+
+Iltimos, quyidagi reja asosida tizimni sinovdan o'tkazib, har bir bo'lim uchun qisqacha hisobot bering.
+
+1-Bo'lim: Asosiy Avtomatlashtirish Tizimi (Kontent Fabrikasi)
+Maqsad: Yangiliklarni yig'ish, tarjima qilish va joylash jarayoni xatosiz ishlayotganiga ishonch hosil qilish.
+
+Test 1.1 (Yangi Maqola Generatsiyasi): Tizimni yangi RSS xabarini olishga majbur qiling (yoki kuting).
+
+Savol: Yangi maqola muvaffaqiyatli generatsiya qilindimi va ma'lumotlar bazasiga yozildimi?
+
+Test 1.2 (Ko'p Tilli Tarjima): Generatsiya qilingan o'sha bitta maqolani ma'lumotlar bazasidan tekshiring.
+
+Savol: Maqolaning o'zbek, rus va ingliz tillaridagi versiyalari mavjudmi?
+
+Test 1.3 (Kontent Sifati): Maqolaning matnini tekshiring.
+
+Savol: Matn hajmi (~350-400 so'z), strukturasi (kirish, asosiy qism, xulosa) va formatlashning tozaligi (** belgilarsiz) talabga javob beradimi?
+
+Test 1.4 (Rasm Integratsiyasi): Maqolaga biriktirilgan rasmni tekshiring.
+
+Savol: Rasm Unsplash'dan olinganmi va maqola mavzusiga avvalgidan ko'ra aniqroq mos keladimi?
+
+Test 1.5 (Telegram Posting): Telegram kanalini tekshiring.
+
+Savol: Yangi maqola haqidagi e'lon kanalga avtomatik tarzda joylandimi?
+
+2-Bo'lim: Frontend (Foydalanuvchi Interfeysi)
+Maqsad: Saytning foydalanuvchi ko'radigan qismi barcha qurilmalarda va barcha tillarda to'g'ri ishlayotganini tekshirish.
+
+Test 2.1 (Ko'p Tilli Interfeys): Saytni oching va header'dagi tilni o'zgartirish menyusidan foydalaning.
+
+Savol: O'zbek, Rus, Ingliz tillarini tanlaganda saytning interfeysi (menyu, tugmalar) va maqolalar mazmuni shu tilga mos ravishda o'zgaryaptimi? URL manzili (/uz, /ru, /en) to'g'ri yangilanayaptimi?
+
+Test 2.2 (Qidiruv): Har uchala tilda ham biror kalit so'z bilan qidiruvdan foydalaning.
+
+Savol: Qidiruv natijalari mos tilda va to'g'ri chiqyaptimi?
+
+Test 2.3 (PWA): Saytni mobil qurilma (yoki kompyuterdagi Chrome'ning mobil emulyatori) orqali oching.
+
+Savol: "Bosh ekranga qo'shish" (Add to Home Screen) taklifi chiqyaptimi? Internetni o'chirib, saytni qayta yuklaganda, keshlangan ma'lumotlar bilan ochilyaptimi (offlayn rejim)?
+
+Test 2.4 (Push-Bildirishnomalar): "Obuna bo'lish" tugmasini bosing.
+
+Savol: Obuna jarayoni xatosiz, tez yakunlanyaptimi? (Eski "qotib qolish" muammosi yo'qmi?)
+
+3-Bo'lim: Admin Panel
+Maqsad: Administrator uchun barcha boshqaruv vositalari to'g'ri va xavfsiz ishlayotganini tekshirish.
+
+Test 3.1 (Xavfsizlik): Saytdan logout qiling (yoki inkognito oynada oching) va to'g'ridan-to'g'ri /admin manziliga kirishga harakat qiling.
+
+Savol: Tizim sizni avtomatik /login sahifasiga yo'naltiryaptimi?
+
+Test 3.2 (Kirish): To'g'ri va noto'g'ri login/parol bilan kirishga harakat qiling.
+
+Savol: Tizim to'g'ri parolni qabul qilib, noto'g'risini rad etyaptimi?
+
+Test 3.3 (CRUD Operatsiyalari): Admin panelga kirib, quyidagilarni sinab ko'ring:
+
+Qo'lda yangi maqola yarating.
+
+Mavjud maqolani tahrirlang (matnini, rasmini o'zgartiring).
+
+Birorta maqolani o'chiring.
+
+Savol: Barcha bu amallar muvaffaqiyatli bajarildimi va o'zgarishlar asosiy saytda o'z aksini topdimi?
+
+Hisobot Andozasi
+Iltimos, test natijalarini quyidagi oddiy andoza bo'yicha taqdim eting:
+
+1-Bo'lim: Avtomatlashtirish Tizimi:
+
+Status: ✅ Muvaffaqiyatli / 🟡 Muammolar bilan / ❌ Ishlamayapti
+
+Izohlar: (Agar muammo bo'lsa, qisqacha tavsifi)
+
+2-Bo'lim: Frontend:
+
+Status: ✅ Muvaffaqiyatli / 🟡 Muammolar bilan / ❌ Ishlamayapti
+
+Izohlar:
+
+3-Bo'lim: Admin Panel:
+
+Status: ✅ Muvaffaqiyatli / 🟡 Muammolar bilan / ❌ Ishlamayapti
+
+Izohlar:
+
+Sizning sinchkovlik bilan o'tkazgan testingiz loyihaning kelajakdagi barqarorligi uchun juda katta ahamiyatga ega. Natijalarni kutib qolaman!
