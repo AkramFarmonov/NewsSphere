@@ -153,6 +153,104 @@ async function seedDatabase() {
       }
     }
 
+    // Create sample stories
+    const sampleStories = [
+      {
+        title: "O'zbekistondagi eng so'nggi yangiliklar",
+        description: "Bugungi eng muhim voqealar",
+        categorySlug: "ozbekiston",
+        thumbnail: "https://images.unsplash.com/photo-1495020689067-958852a7765e?w=400&h=600&fit=crop",
+        items: [
+          {
+            type: "image",
+            mediaUrl: "https://images.unsplash.com/photo-1495020689067-958852a7765e?w=400&h=600&fit=crop",
+            title: "Yangi texnopark ochildi",
+            content: "Toshkentda zamonaviy texnologiyalar parki tantanali ravishda ochildi",
+            duration: 5,
+            order: 1
+          },
+          {
+            type: "image",
+            mediaUrl: "https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=400&h=600&fit=crop",
+            title: "Ta'lim sohasida o'zgarishlar",
+            content: "Yangi o'quv yili uchun muhim o'zgarishlar kiritilmoqda",
+            duration: 5,
+            order: 2
+          }
+        ]
+      },
+      {
+        title: "Sport yangiliklari",
+        description: "Bugungi sport voqealari",
+        categorySlug: "sport",
+        thumbnail: "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=400&h=600&fit=crop",
+        items: [
+          {
+            type: "image",
+            mediaUrl: "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=400&h=600&fit=crop",
+            title: "Futbol chempionati",
+            content: "Milliy jamoamiz navbatdagi g'alabaga erishdi",
+            duration: 5,
+            order: 1
+          },
+          {
+            type: "image",
+            mediaUrl: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=600&fit=crop",
+            title: "Olimpiya taygarlighi",
+            content: "O'zbek sportchilari keladigan Olimpiadaga tayyorlanmoqda",
+            duration: 5,
+            order: 2
+          }
+        ]
+      },
+      {
+        title: "Texnologiya dunyo",
+        description: "So'nggi texnologik yangiliklar",
+        categorySlug: "texnologiya",
+        thumbnail: "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=400&h=600&fit=crop",
+        items: [
+          {
+            type: "image",
+            mediaUrl: "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=400&h=600&fit=crop",
+            title: "AI rivojlanishi",
+            content: "Sun'iy intellekt texnologiyalari yangi bosqichga chiqdi",
+            duration: 5,
+            order: 1
+          }
+        ]
+      }
+    ];
+
+    for (const storyData of sampleStories) {
+      const category = createdCategories.find(cat => cat.slug === storyData.categorySlug);
+      if (category) {
+        // Create the story
+        const story = await storage.createStory({
+          title: storyData.title,
+          description: storyData.description,
+          categoryId: category.id,
+          thumbnail: storyData.thumbnail,
+          isActive: "true",
+          order: sampleStories.indexOf(storyData) + 1
+        });
+
+        // Create story items
+        for (const itemData of storyData.items) {
+          await storage.createStoryItem({
+            storyId: story.id,
+            type: itemData.type,
+            mediaUrl: itemData.mediaUrl,
+            title: itemData.title,
+            content: itemData.content,
+            duration: itemData.duration,
+            order: itemData.order
+          });
+        }
+
+        console.log(`Created story: ${storyData.title} with ${storyData.items.length} items`);
+      }
+    }
+
     console.log("Database seeding completed successfully!");
   } catch (error) {
     console.error("Error seeding database:", error);
