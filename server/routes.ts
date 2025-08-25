@@ -10,8 +10,8 @@ import { z } from "zod";
 import { registerImageRoutes } from "./routes/images";
 import { PushNotificationService } from "./services/push-notifications";
 
-// Use memory storage if DATABASE_URL is not available, otherwise use DB storage
-const storage = process.env.DATABASE_URL ? new DbStorage() : new MemStorage();
+// Use memory storage temporarily for demo purposes
+const storage = new MemStorage();
 const authService = new AuthService(storage as any);
 const pushService = new PushNotificationService(storage as any);
 
