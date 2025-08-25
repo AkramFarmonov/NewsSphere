@@ -192,10 +192,6 @@ export default function Header() {
         {/* Real-time Data Bar */}
         <div className="py-2 border-t border-gray-100 bg-gray-50">
           <div className="flex items-center justify-center space-x-6 text-sm text-gray-600">
-            <span className="flex items-center" title="Toshkent vaqti">
-              <Calendar className="w-4 h-4 mr-1" />
-              {currentDate} • {currentTime}
-            </span>
             <span className="flex items-center" title={`Ob-havo: ${weather.condition}`}>
               <Thermometer className="w-4 h-4 mr-1" />
               {weather.loading ? "..." : weather.error ? "---" : `${weather.temperature > 0 ? '+' : ''}${weather.temperature}°C`}
