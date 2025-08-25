@@ -1,6 +1,8 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
-import { storage } from "./storage";
+import { DbStorage } from "./db-storage";
+
+const storage = new DbStorage();
 import { rssParser } from "./services/rss-parser";
 import { insertNewsletterSchema } from "@shared/schema";
 import { z } from "zod";
