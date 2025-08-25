@@ -4,6 +4,8 @@ import ws from "ws";
 import * as schema from "@shared/schema";
 
 neonConfig.webSocketConstructor = ws;
+// Fix SSL certificate issues in development
+neonConfig.fetchConnectionCache = true;
 
 if (!process.env.DATABASE_URL) {
   throw new Error(
@@ -11,5 +13,12 @@ if (!process.env.DATABASE_URL) {
   );
 }
 
-export const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+// Handle SSL configuration for development environment
+const connectionString = process.env.DATABASE_URL;
+const poolConfig = {
+  connectionString,
+  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+};
+
+export const pool = new Pool(poolConfig);
 export const db = drizzle({ client: pool, schema });

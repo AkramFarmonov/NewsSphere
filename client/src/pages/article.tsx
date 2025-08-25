@@ -37,7 +37,7 @@ export default function ArticlePage() {
         title: `${article.title} - RealNews`,
         description: article.description || `${article.title} haqida batafsil ma'lumot`,
         keywords: `${article.category.name.toLowerCase()}, yangiliklar, O'zbekiston`,
-        image: article.imageUrl,
+        image: article.imageUrl || undefined,
         type: "article",
         publishedTime: article.publishedAt.toString(),
         author: article.sourceName
