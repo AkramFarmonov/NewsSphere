@@ -422,7 +422,7 @@ export class DbStorage implements IStorage {
 
     return result.map(row => ({
       ...row.story,
-      category: row.category,
+      category: row.category || undefined,
       itemCount: row.itemCount || 0
     }));
   }
@@ -451,7 +451,7 @@ export class DbStorage implements IStorage {
 
     return result.map(row => ({
       ...row.story,
-      category: row.category,
+      category: row.category || undefined,
       itemCount: row.itemCount || 0
     }));
   }
@@ -476,7 +476,7 @@ export class DbStorage implements IStorage {
 
     return {
       ...storyResult[0].story,
-      category: storyResult[0].category,
+      category: storyResult[0].category || undefined,
       items
     };
   }
