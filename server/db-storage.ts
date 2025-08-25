@@ -363,4 +363,22 @@ export class DbStorage implements IStorage {
       .set({ imageUrl })
       .where(eq(articles.id, id));
   }
+
+  async updateArticleWithImage(
+    id: string, 
+    imageUrl: string, 
+    imageAttribution?: string, 
+    imageAuthor?: string, 
+    imageAuthorUrl?: string
+  ): Promise<void> {
+    await this.db
+      .update(articles)
+      .set({ 
+        imageUrl,
+        imageAttribution: imageAttribution || null,
+        imageAuthor: imageAuthor || null,
+        imageAuthorUrl: imageAuthorUrl || null
+      })
+      .where(eq(articles.id, id));
+  }
 }

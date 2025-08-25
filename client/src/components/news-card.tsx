@@ -63,12 +63,29 @@ export default function NewsCard({
       <article className="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow" data-testid={`news-card-${article.id}`}>
         <Link href={`/article/${article.slug}`} className="flex">
           {showImage && article.imageUrl && (
-            <img 
-              src={article.imageUrl} 
-              alt={article.title}
-              className="w-24 h-16 object-cover rounded-lg mr-4 flex-shrink-0"
-              data-testid={`news-image-${article.id}`}
-            />
+            <div className="relative mr-4 flex-shrink-0">
+              <img 
+                src={article.imageUrl} 
+                alt={article.title}
+                className="w-24 h-16 object-cover rounded-lg"
+                data-testid={`news-image-${article.id}`}
+              />
+              {article.imageAttribution && (
+                <div className="absolute bottom-0 right-0 bg-black bg-opacity-70 text-white px-1 py-0.5 text-xs rounded-tl">
+                  <a 
+                    href={article.imageAuthorUrl || "#"} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="hover:underline"
+                    data-testid={`image-attribution-${article.id}`}
+                    onClick={(e) => e.stopPropagation()}
+                    title={article.imageAttribution}
+                  >
+                    📸
+                  </a>
+                </div>
+              )}
+            </div>
           )}
           <div className="flex-1">
             {showCategory && (
@@ -121,13 +138,29 @@ export default function NewsCard({
     <article className="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-shadow" data-testid={`news-card-${article.id}`}>
       <Link href={`/article/${article.slug}`}>
         {showImage && article.imageUrl && (
-          <img 
-            src={article.imageUrl} 
-            alt={article.title}
-            className="w-full h-48 sm:h-52 md:h-48 object-cover"
-            data-testid={`news-image-${article.id}`}
-            loading="lazy"
-          />
+          <div className="relative">
+            <img 
+              src={article.imageUrl} 
+              alt={article.title}
+              className="w-full h-48 sm:h-52 md:h-48 object-cover"
+              data-testid={`news-image-${article.id}`}
+              loading="lazy"
+            />
+            {article.imageAttribution && (
+              <div className="absolute bottom-2 right-2 bg-black bg-opacity-70 text-white px-2 py-1 text-xs rounded">
+                <a 
+                  href={article.imageAuthorUrl || "#"} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="hover:underline"
+                  data-testid={`image-attribution-${article.id}`}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {article.imageAttribution}
+                </a>
+              </div>
+            )}
+          </div>
         )}
         <div className="p-4 sm:p-5">
           {showCategory && (

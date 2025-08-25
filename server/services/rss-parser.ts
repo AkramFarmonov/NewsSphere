@@ -127,10 +127,21 @@ export class RssParser {
         // Try to get image from RSS feed first, then fallback to Unsplash
         let imageUrl = this.extractImageUrl(item);
         
+        // Initialize attribution fields
+        let imageAttribution: string | undefined;
+        let imageAuthor: string | undefined;
+        let imageAuthorUrl: string | undefined;
+        
         if (!imageUrl) {
           const category = await storage.getCategoryById(categoryId);
           if (category) {
-            imageUrl = await unsplashService.getArticleImage(title, category.name) || undefined;
+            const unsplashData = await unsplashService.getArticleImage(title, category.name);
+            if (unsplashData) {
+              imageUrl = unsplashData.imageUrl;
+              imageAttribution = unsplashData.attribution;
+              imageAuthor = unsplashData.author;
+              imageAuthorUrl = unsplashData.authorUrl;
+            }
           }
         }
         
@@ -173,6 +184,9 @@ export class RssParser {
           description: enhancedArticle.description,
           content: enhancedArticle.content,
           imageUrl,
+          imageAttribution,
+          imageAuthor,
+          imageAuthorUrl,
           sourceUrl,
           sourceName,
           categoryId,

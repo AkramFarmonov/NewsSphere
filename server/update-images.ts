@@ -16,16 +16,23 @@ async function updateAllImages() {
       try {
         console.log(`Updating image for: ${article.title}`);
         
-        // Get new image from Unsplash
-        const newImageUrl = await unsplashService.getArticleImage(
+        // Get new image with attribution from Unsplash
+        const unsplashData = await unsplashService.getArticleImage(
           article.title,
           article.category.name
         );
 
-        if (newImageUrl) {
-          await storage.updateArticleImage(article.id, newImageUrl);
+        if (unsplashData) {
+          await storage.updateArticleWithImage(
+            article.id, 
+            unsplashData.imageUrl,
+            unsplashData.attribution,
+            unsplashData.author,
+            unsplashData.authorUrl
+          );
           console.log(`✅ Updated: ${article.title.substring(0, 50)}...`);
-          console.log(`   Image: ${newImageUrl}`);
+          console.log(`   Image: ${unsplashData.imageUrl}`);
+          console.log(`   Attribution: ${unsplashData.attribution}`);
           updatedCount++;
         } else {
           console.log(`❌ No image found for: ${article.title.substring(0, 50)}...`);

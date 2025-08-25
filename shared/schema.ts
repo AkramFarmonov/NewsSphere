@@ -25,6 +25,9 @@ export const articles = pgTable("articles", {
   description: text("description"),
   content: text("content"),
   imageUrl: text("image_url"),
+  imageAttribution: text("image_attribution"), // "Photo by John Doe on Unsplash"
+  imageAuthor: text("image_author"), // "John Doe"
+  imageAuthorUrl: text("image_author_url"), // "https://unsplash.com/@johndoe"
   sourceUrl: text("source_url").notNull(),
   sourceName: text("source_name").notNull(),
   categoryId: varchar("category_id").references(() => categories.id).notNull(),

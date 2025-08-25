@@ -43,6 +43,7 @@ export interface IStorage {
   updateArticleFeatured(id: string, isFeatured: string): Promise<void>;
   updateArticleBreaking(id: string, isBreaking: string): Promise<void>;
   updateArticleImage(id: string, imageUrl: string): Promise<void>;
+  updateArticleWithImage(id: string, imageUrl: string, imageAttribution?: string, imageAuthor?: string, imageAuthorUrl?: string): Promise<void>;
   getCategoryById(id: string): Promise<Category | undefined>;
 }
 
@@ -206,6 +207,9 @@ export class MemStorage implements IStorage {
           description: articleData.description || null,
           content: articleData.content || null,
           imageUrl: articleData.imageUrl ?? null,
+          imageAttribution: null, // Will be updated with Unsplash data
+          imageAuthor: null,
+          imageAuthorUrl: null,
           sourceUrl: articleData.sourceUrl,
           sourceName: articleData.sourceName,
           categoryId: category.id,
@@ -336,6 +340,9 @@ export class MemStorage implements IStorage {
       description: insertArticle.description ?? null,
       content: insertArticle.content ?? null,
       imageUrl: insertArticle.imageUrl ?? null,
+      imageAttribution: insertArticle.imageAttribution ?? null,
+      imageAuthor: insertArticle.imageAuthor ?? null,
+      imageAuthorUrl: insertArticle.imageAuthorUrl ?? null,
       isBreaking: insertArticle.isBreaking ?? "false",
       isFeatured: insertArticle.isFeatured ?? "false",
       createdAt: new Date(),
@@ -487,6 +494,23 @@ export class MemStorage implements IStorage {
     const article = this.articles.get(id);
     if (article) {
       article.imageUrl = imageUrl;
+      this.articles.set(id, article);
+    }
+  }
+
+  async updateArticleWithImage(
+    id: string, 
+    imageUrl: string, 
+    imageAttribution?: string, 
+    imageAuthor?: string, 
+    imageAuthorUrl?: string
+  ): Promise<void> {
+    const article = this.articles.get(id);
+    if (article) {
+      article.imageUrl = imageUrl;
+      article.imageAttribution = imageAttribution || null;
+      article.imageAuthor = imageAuthor || null;
+      article.imageAuthorUrl = imageAuthorUrl || null;
       this.articles.set(id, article);
     }
   }

@@ -19,7 +19,21 @@ interface UnsplashPhoto {
   user: {
     name: string;
     username: string;
+    links: {
+      html: string;
+    };
   };
+  links: {
+    html: string;
+    download_location: string;
+  };
+}
+
+interface UnsplashImageData {
+  imageUrl: string;
+  attribution: string;
+  author: string;
+  authorUrl: string;
 }
 
 interface UnsplashSearchResponse {
@@ -77,9 +91,9 @@ export class UnsplashService {
   }
 
   /**
-   * Get image URL for an article based on its title and category
+   * Get image with attribution for an article based on its title and category
    */
-  async getArticleImage(title: string, category: string): Promise<string | null> {
+  async getArticleImage(title: string, category: string): Promise<UnsplashImageData | null> {
     // Create search queries in order of preference
     const searchQueries = [
       `${category} news`,
@@ -91,11 +105,34 @@ export class UnsplashService {
     for (const query of searchQueries) {
       const photos = await this.searchPhotos(query, 1);
       if (photos.length > 0) {
-        return photos[0].urls.regular;
+        const photo = photos[0];
+        
+        // Trigger download endpoint as required by Unsplash API
+        await this.triggerDownload(photo.links.download_location);
+        
+        return {
+          imageUrl: photo.urls.regular,
+          attribution: `Photo by ${photo.user.name} on Unsplash`,
+          author: photo.user.name,
+          authorUrl: photo.user.links.html
+        };
       }
     }
 
     return null;
+  }
+
+  /**
+   * Trigger download endpoint as required by Unsplash API
+   */
+  private async triggerDownload(downloadLocation: string): Promise<void> {
+    try {
+      await fetch(downloadLocation, {
+        headers: this.getHeaders()
+      });
+    } catch (error) {
+      console.error("Failed to trigger Unsplash download:", error);
+    }
   }
 
   /**
@@ -114,13 +151,13 @@ export class UnsplashService {
   }
 
   /**
-   * Get category-specific image for fallback
+   * Get category-specific image with attribution for fallback
    */
-  async getCategoryImage(categorySlug: string): Promise<string | null> {
+  async getCategoryImage(categorySlug: string): Promise<UnsplashImageData | null> {
     const categoryMappings: Record<string, string> = {
       "ozbekiston": "uzbekistan flag architecture",
       "dunyo": "world global news",
-      "sport": "sports athlete competition",
+      "sport": "sports athlete competition", 
       "texnologiya": "technology innovation computer",
       "iqtisodiyot": "business economy finance",
       "madaniyat": "culture art traditional",
@@ -130,7 +167,21 @@ export class UnsplashService {
     const searchQuery = categoryMappings[categorySlug] || categorySlug;
     const photos = await this.searchPhotos(searchQuery, 1);
     
-    return photos.length > 0 ? photos[0].urls.regular : null;
+    if (photos.length > 0) {
+      const photo = photos[0];
+      
+      // Trigger download endpoint as required by Unsplash API
+      await this.triggerDownload(photo.links.download_location);
+      
+      return {
+        imageUrl: photo.urls.regular,
+        attribution: `Photo by ${photo.user.name} on Unsplash`,
+        author: photo.user.name,
+        authorUrl: photo.user.links.html
+      };
+    }
+    
+    return null;
   }
 }
 
