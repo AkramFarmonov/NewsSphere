@@ -176,21 +176,11 @@ export default function Header() {
             <div className="flex items-center space-x-3 lg:space-x-4 text-xs lg:text-sm text-gray-500">
               <span className="flex items-center" title={`Ob-havo: ${weather.condition}`}>
                 <Thermometer className="w-3 lg:w-4 h-3 lg:h-4 mr-1" />
-                <span className="hidden sm:inline">
-                  {weather.loading ? "..." : weather.error ? "---" : `${weather.temperature > 0 ? '+' : ''}${weather.temperature}°C`}
-                </span>
-                <span className="sm:hidden">
-                  {weather.loading ? "..." : weather.error ? "---" : `${weather.temperature > 0 ? '+' : ''}${weather.temperature}°`}
-                </span>
+                {weather.loading ? "..." : weather.error ? "---" : `${weather.temperature > 0 ? '+' : ''}${weather.temperature}°C`}
               </span>
               <span className="flex items-center" title="USD kursi (O'zbekiston Markaziy Banki)">
                 <DollarSign className="w-3 lg:w-4 h-3 lg:h-4 mr-1" />
-                <span className="hidden sm:inline">
-                  {currency.loading ? "..." : currency.error ? "---" : `1$ = ${currency.rate.toLocaleString()} so'm`}
-                </span>
-                <span className="sm:hidden">
-                  {currency.loading ? "..." : currency.error ? "---" : `1$ = ${Math.round(currency.rate / 1000)}k`}
-                </span>
+                {currency.loading ? "..." : currency.error ? "---" : `1$ = ${Math.round(currency.rate / 1000)}k so'm`}
               </span>
             </div>
           </div>
