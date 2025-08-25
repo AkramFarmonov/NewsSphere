@@ -1,0 +1,49 @@
+Ko'p Tilli Platforma Uchun Harakatlar Rejasi
+1-Bosqich: Backend'ni Moslashtirish (Kontentni Uch Tilga Tayyorlash)
+Biz avval ma'lumotlar saqlanadigan va generatsiya qilinadigan qismni to'g'rilab olishimiz kerak.
+
+1. Ma'lumotlar Bazasini Yangilash (Database Schema Migration):
+
+Hozirgi articles jadvalidagi tilga bog'liq ustunlar (title_uz, content_uz) o'rniga, bizga yangi, moslashuvchan tizim kerak.
+
+Yangi article_translations jadvalini yaratamiz. Bu jadvalda article_id (asosiy maqolaga havola), language_code ('uz', 'ru', 'en'), title, va content kabi ustunlar bo'ladi.
+
+Asosiy articles jadvalida esa faqat tilga bog'liq bo'lmagan ma'lumotlar (rasm URL'i, original manba linki, yaratilgan sana) qoladi.
+
+2. AI Promtini Uch Til Uchun Yangilash:
+
+Hozirgi AI promtimiz faqat o'zbek tilida yozishni so'raydi. Biz uni o'zgartirib, bitta original matndan bir yo'la uchta tilda (o'zbek, rus, ingliz) maqola yozishni so'raydigan qilamiz. Bu resurslarni ancha tejaydi.
+
+Yangi maqola kelganda, tizim bitta asosiy maqola yozuvini va unga bog'liq uchta tarjima yozuvini (article_translations jadvaliga) avtomatik yaratadi.
+
+3. API Endpoint'larni Yangilash:
+
+Frontend'dan keladigan barcha so'rovlarga (/api/articles, /api/articles/search va hokazo) qaysi tildagi ma'lumot kerakligini bilish uchun lang parametri qo'shiladi (masalan, /api/articles?lang=ru).
+
+API shu parametrga qarab ma'lumotlar bazasidan mos tildagi kontentni tanlab, jo'natadi.
+
+2. Frontend'ni Moslashtirish (Interfeysni Uch Tilga O'tkazish)
+Backend tayyor bo'lgach, foydalanuvchi ko'radigan qismni o'zgartiramiz.
+
+1. Ko'p Tilli Routing'ni Sozlash:
+
+Sayt manzillari (URL) qaysi tilda ekanini ko'rsatib turishi kerak. Masalan:
+
+realnews.uz/uz/maqola-nomi
+
+realnews.uz/ru/nazvanie-stati
+
+realnews.uz/en/article-title
+
+Bu SEO (qidiruv tizimlari) uchun ham eng to'g'ri yondashuv.
+
+2. Interfeys Matnlarini Markazlashtirish (i18n):
+
+Saytdagi barcha statik matnlar ("Mashhur yangiliklar", "Qidirish...", "Bosh sahifa") koddan ajratilib, alohida til fayllariga (uz.json, ru.json, en.json) joylashtiriladi.
+
+Buning uchun i18next kabi professional React kutubxonasini loyihaga integratsiya qilamiz.
+
+3. Tilni O'zgartirish Funksiyasini Ishga Tushirish:
+
+Saytning yuqori qismidagi tilni o'zgartirish menyusi endi to'liq ishlaydigan bo'ladi. Foydalanuvchi "Русский"ni tanlasa, sayt uni /ru manziliga o'tkazadi, interfeys rus tiliga o'zgaradi va API'dan rus tilidagi maqolalar yuklanadi.
+
