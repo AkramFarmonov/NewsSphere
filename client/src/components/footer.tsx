@@ -10,8 +10,13 @@ export default function Footer() {
           
           {/* Company Info */}
           <div className="md:col-span-1" data-testid="footer-company">
-            <div className="text-2xl font-bold mb-4">
-              <i className="fas fa-newspaper mr-2"></i>RealNews
+            <div className="text-2xl font-bold mb-4 flex items-center">
+              <img 
+                src="/logo.png?v=2" 
+                alt="RealNews" 
+                className="h-8 w-auto mr-3"
+              />
+              RealNews
             </div>
             <p className="text-blue-200 mb-4">
               O'zbekiston va dunyo bo'ylab eng ishonchli yangiliklar manbai. Biz sizga eng so'nggi va muhim yangiliklarni yetkazamiz.

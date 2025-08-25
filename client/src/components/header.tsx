@@ -37,42 +37,8 @@ export default function Header() {
   return (
     <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50" data-testid="header">
       <div className="container mx-auto px-4 max-w-7xl">
-        {/* Top Bar */}
-        <div className="py-2 border-b border-gray-100 text-sm text-gray-600">
-          <div className="flex justify-between items-center">
-            <div className="flex items-center space-x-4">
-              <span className="flex items-center">
-                <Calendar className="w-4 h-4 mr-1" />
-                {currentDate}
-              </span>
-              <span className="flex items-center">
-                <Thermometer className="w-4 h-4 mr-1" />
-                Toshkent +5°C
-              </span>
-            </div>
-            <div className="flex items-center space-x-4">
-              <div className="hidden md:flex items-center space-x-4">
-                <a href="#" className="hover:text-accent transition-colors" data-testid="link-telegram">
-                  <i className="fab fa-telegram"></i>
-                </a>
-                <a href="#" className="hover:text-accent transition-colors" data-testid="link-facebook">
-                  <i className="fab fa-facebook"></i>
-                </a>
-                <a href="#" className="hover:text-accent transition-colors" data-testid="link-instagram">
-                  <i className="fab fa-instagram"></i>
-                </a>
-              </div>
-              <select className="text-sm border-none bg-transparent" data-testid="select-language">
-                <option>O'zbek</option>
-                <option>Русский</option>
-                <option>English</option>
-              </select>
-            </div>
-          </div>
-        </div>
-
-        {/* Main Navigation */}
-        <nav className="py-4">
+        {/* Tier 1: Branding and Actions */}
+        <div className="py-4 border-b border-gray-100">
           <div className="flex items-center justify-between">
             {/* Logo */}
             <Link href="/" className="flex items-center space-x-3" data-testid="link-logo">
@@ -86,67 +52,58 @@ export default function Header() {
               </div>
             </Link>
 
-            {/* Desktop Navigation */}
-            <div className="hidden lg:flex items-center space-x-8">
-              <Link 
-                href="/" 
-                className={`font-medium transition-colors ${
-                  location === "/" ? "text-primary" : "hover:text-accent"
-                }`}
-                data-testid="nav-home"
-              >
-                Bosh sahifa
-              </Link>
-              <Link 
-                href="/stories" 
-                className={`font-medium transition-colors ${
-                  location === "/stories" ? "text-primary" : "hover:text-accent"
-                }`}
-                data-testid="nav-stories"
-              >
-                📖 Stories
-              </Link>
-              {categories.map((category) => (
-                <Link
-                  key={category.slug}
-                  href={`/category/${category.slug}`}
-                  className={`transition-colors ${
-                    location === `/category/${category.slug}` ? "text-primary" : "hover:text-accent"
-                  }`}
-                  data-testid={`nav-${category.slug}`}
-                >
-                  {category.name}
-                </Link>
-              ))}
-            </div>
-
-            {/* Search and Mobile Menu */}
+            {/* Action Icons */}
             <div className="flex items-center space-x-4">
-              {/* Push Notifications */}
-              <PushNotificationButton />
               {/* Desktop Search */}
               <div className="relative hidden md:block">
-                <form onSubmit={handleSearchSubmit}>
-                  <Input
-                    type="search"
-                    placeholder="Qidirish..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10 pr-4 py-2 w-64"
-                    data-testid="input-search"
-                  />
-                  <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                </form>
+                {!isSearchOpen ? (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setIsSearchOpen(true)}
+                    data-testid="button-search-toggle"
+                  >
+                    <Search className="w-5 h-5" />
+                  </Button>
+                ) : (
+                  <div className="flex items-center space-x-2">
+                    <form onSubmit={handleSearchSubmit} className="flex items-center">
+                      <Input
+                        type="search"
+                        placeholder="Qidirish..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-64"
+                        data-testid="input-search"
+                        autoFocus
+                      />
+                    </form>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        setIsSearchOpen(false);
+                        setSearchQuery("");
+                      }}
+                      data-testid="button-search-close"
+                    >
+                      <X className="w-4 h-4" />
+                    </Button>
+                  </div>
+                )}
                 
                 {/* Search Results Dropdown */}
-                {searchQuery && searchResults.length > 0 && (
+                {isSearchOpen && searchQuery && searchResults.length > 0 && (
                   <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-lg mt-1 max-h-96 overflow-y-auto">
                     {searchResults.map((article) => (
                       <Link
                         key={article.id}
                         href={`/article/${article.slug}`}
                         className="block p-3 hover:bg-gray-50 border-b border-gray-100 last:border-0"
-                        onClick={() => setSearchQuery("")}
+                        onClick={() => {
+                          setSearchQuery("");
+                          setIsSearchOpen(false);
+                        }}
                         data-testid={`search-result-${article.id}`}
                       >
                         <h4 className="font-medium text-sm mb-1">{article.title}</h4>
@@ -156,6 +113,16 @@ export default function Header() {
                   </div>
                 )}
               </div>
+
+              {/* Push Notifications */}
+              <PushNotificationButton />
+              
+              {/* Language Selector */}
+              <select className="text-sm border-none bg-transparent cursor-pointer" data-testid="select-language">
+                <option>🇺🇿 O'zbek</option>
+                <option>🇷🇺 Русский</option>
+                <option>🇺🇸 English</option>
+              </select>
 
               {/* Mobile Search Button */}
               <Button
@@ -178,6 +145,48 @@ export default function Header() {
               >
                 {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
               </Button>
+            </div>
+          </div>
+        </div>
+
+        {/* Tier 2: Navigation Menu */}
+        <nav className="py-3">
+          <div className="flex items-center justify-between">
+            {/* Navigation Links */}
+            <div className="hidden lg:flex items-center space-x-8">
+              <Link 
+                href="/stories" 
+                className={`font-medium transition-colors ${
+                  location === "/stories" ? "text-primary" : "hover:text-accent"
+                }`}
+                data-testid="nav-stories"
+              >
+                📖 Stories
+              </Link>
+              {categories.map((category) => (
+                <Link
+                  key={category.slug}
+                  href={`/category/${category.slug}`}
+                  className={`transition-colors font-medium ${
+                    location === `/category/${category.slug}` ? "text-primary" : "hover:text-accent"
+                  }`}
+                  data-testid={`nav-${category.slug}`}
+                >
+                  {category.name}
+                </Link>
+              ))}
+            </div>
+
+            {/* Date and Weather */}
+            <div className="hidden lg:flex items-center space-x-4 text-sm text-gray-500">
+              <span className="flex items-center">
+                <Calendar className="w-4 h-4 mr-1" />
+                {currentDate}
+              </span>
+              <span className="flex items-center">
+                <Thermometer className="w-4 h-4 mr-1" />
+                Toshkent +5°C
+              </span>
             </div>
           </div>
         </nav>
@@ -204,12 +213,12 @@ export default function Header() {
               <ul className="space-y-4">
                 <li>
                   <Link 
-                    href="/" 
+                    href="/stories" 
                     className="block py-2 text-primary font-medium"
                     onClick={toggleMobileMenu}
-                    data-testid="mobile-nav-home"
+                    data-testid="mobile-nav-stories"
                   >
-                    Bosh sahifa
+                    📖 Stories
                   </Link>
                 </li>
                 {categories.map((category) => (
