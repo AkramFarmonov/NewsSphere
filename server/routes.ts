@@ -7,6 +7,7 @@ import { requireAuth, requireAdmin } from "./middleware/auth";
 import { rssParser } from "./services/rss-parser";
 import { insertNewsletterSchema, insertUserSchema } from "@shared/schema";
 import { z } from "zod";
+import { registerImageRoutes } from "./routes/images";
 
 // Use memory storage if DATABASE_URL is not available, otherwise use DB storage
 const storage = process.env.DATABASE_URL ? new DbStorage() : new MemStorage();
@@ -533,6 +534,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       version: "1.0.0"
     });
   });
+
+  // Register image routes
+  registerImageRoutes(app);
 
   const httpServer = createServer(app);
   

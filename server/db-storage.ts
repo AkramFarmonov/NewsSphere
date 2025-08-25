@@ -356,4 +356,11 @@ export class DbStorage implements IStorage {
       .set({ isBreaking })
       .where(eq(articles.id, id));
   }
+
+  async updateArticleImage(id: string, imageUrl: string): Promise<void> {
+    await this.db
+      .update(articles)
+      .set({ imageUrl })
+      .where(eq(articles.id, id));
+  }
 }

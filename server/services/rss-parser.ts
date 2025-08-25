@@ -2,6 +2,7 @@ import { parseStringPromise } from 'xml2js';
 import { storage } from '../storage';
 import { aiGenerator } from './ai-generator';
 import { telegramBot } from './telegram-bot';
+import { unsplashService } from './unsplash';
 import type { InsertArticle } from '@shared/schema';
 
 interface RssItem {
@@ -123,7 +124,15 @@ export class RssParser {
           ? this.cleanContent(item.description[0])
           : undefined;
         
-        const imageUrl = this.extractImageUrl(item);
+        // Try to get image from RSS feed first, then fallback to Unsplash
+        let imageUrl = this.extractImageUrl(item);
+        
+        if (!imageUrl) {
+          const category = await storage.getCategoryById(categoryId);
+          if (category) {
+            imageUrl = await unsplashService.getArticleImage(title, category.name) || undefined;
+          }
+        }
         
         const publishedAt = item.pubDate?.[0] 
           ? new Date(item.pubDate[0])

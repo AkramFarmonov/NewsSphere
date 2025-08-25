@@ -42,6 +42,7 @@ export interface IStorage {
   // Admin methods
   updateArticleFeatured(id: string, isFeatured: string): Promise<void>;
   updateArticleBreaking(id: string, isBreaking: string): Promise<void>;
+  updateArticleImage(id: string, imageUrl: string): Promise<void>;
   getCategoryById(id: string): Promise<Category | undefined>;
 }
 
@@ -478,6 +479,14 @@ export class MemStorage implements IStorage {
     const article = this.articles.get(id);
     if (article) {
       article.isBreaking = isBreaking;
+      this.articles.set(id, article);
+    }
+  }
+
+  async updateArticleImage(id: string, imageUrl: string): Promise<void> {
+    const article = this.articles.get(id);
+    if (article) {
+      article.imageUrl = imageUrl;
       this.articles.set(id, article);
     }
   }
