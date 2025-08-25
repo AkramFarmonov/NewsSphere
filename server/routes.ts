@@ -1,11 +1,21 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { DbStorage } from "./db-storage";
+import { AuthService, createSessionUser, type SessionUser } from "./auth";
+import { requireAuth, requireAdmin } from "./middleware/auth";
+import { rssParser } from "./services/rss-parser";
+import { insertNewsletterSchema, insertUserSchema } from "@shared/schema";
+import { z } from "zod";
 
 const storage = new DbStorage();
-import { rssParser } from "./services/rss-parser";
-import { insertNewsletterSchema } from "@shared/schema";
-import { z } from "zod";
+const authService = new AuthService(storage);
+
+// Extend express-session types
+declare module 'express-session' {
+  interface SessionData {
+    user?: SessionUser;
+  }
+}
 
 const searchSchema = z.object({
   q: z.string().min(1),
@@ -19,6 +29,66 @@ const paginationSchema = z.object({
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
+  // Authentication routes
+  app.post("/api/auth/register", async (req, res) => {
+    try {
+      const userData = insertUserSchema.parse(req.body);
+      const user = await authService.register(userData);
+      const sessionUser = createSessionUser(user);
+      
+      req.session.user = sessionUser;
+      res.status(201).json({ 
+        message: "User registered successfully", 
+        user: sessionUser 
+      });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Invalid input data" });
+      }
+      const message = error instanceof Error ? error.message : "Registration failed";
+      res.status(400).json({ error: message });
+    }
+  });
+
+  app.post("/api/auth/login", async (req, res) => {
+    try {
+      const { username, password } = req.body;
+      
+      if (!username || !password) {
+        return res.status(400).json({ error: "Username and password are required" });
+      }
+
+      const user = await authService.login(username, password);
+      const sessionUser = createSessionUser(user);
+      
+      req.session.user = sessionUser;
+      res.json({ 
+        message: "Login successful", 
+        user: sessionUser 
+      });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Login failed";
+      res.status(401).json({ error: message });
+    }
+  });
+
+  app.post("/api/auth/logout", (req, res) => {
+    req.session.destroy((err) => {
+      if (err) {
+        return res.status(500).json({ error: "Logout failed" });
+      }
+      res.json({ message: "Logout successful" });
+    });
+  });
+
+  app.get("/api/auth/me", (req, res) => {
+    if (req.session?.user) {
+      res.json({ user: req.session.user });
+    } else {
+      res.status(401).json({ error: "Not authenticated" });
+    }
+  });
+
   // Get all categories
   app.get("/api/categories", async (_req, res) => {
     try {
@@ -159,7 +229,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin routes
-  app.post("/api/admin/fetch-rss", async (_req, res) => {
+  app.post("/api/admin/fetch-rss", requireAdmin, async (_req, res) => {
     try {
       await rssParser.fetchAllFeeds();
       res.json({ message: "RSS feeds fetched successfully" });
@@ -169,7 +239,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get all RSS feeds for admin
-  app.get("/api/admin/rss-feeds", async (_req, res) => {
+  app.get("/api/admin/rss-feeds", requireAdmin, async (_req, res) => {
     try {
       const feeds = await storage.getAllRssFeeds();
       res.json(feeds);
@@ -179,7 +249,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Create new RSS feed
-  app.post("/api/admin/rss-feeds", async (req, res) => {
+  app.post("/api/admin/rss-feeds", requireAdmin, async (req, res) => {
     try {
       const feedData = req.body;
       const feed = await storage.createRssFeed(feedData);
@@ -190,7 +260,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get all newsletters for admin
-  app.get("/api/admin/newsletters", async (_req, res) => {
+  app.get("/api/admin/newsletters", requireAdmin, async (_req, res) => {
     try {
       const newsletters = await storage.getAllNewsletters();
       res.json(newsletters);
@@ -200,7 +270,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Create new article (admin)
-  app.post("/api/admin/articles", async (req, res) => {
+  app.post("/api/admin/articles", requireAdmin, async (req, res) => {
     try {
       const articleData = req.body;
       const article = await storage.createArticle(articleData);
@@ -211,7 +281,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Toggle article featured status
-  app.patch("/api/admin/articles/:id/featured", async (req, res) => {
+  app.patch("/api/admin/articles/:id/featured", requireAdmin, async (req, res) => {
     try {
       const { id } = req.params;
       const { isFeatured } = req.body;
@@ -223,7 +293,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Toggle article breaking status
-  app.patch("/api/admin/articles/:id/breaking", async (req, res) => {
+  app.patch("/api/admin/articles/:id/breaking", requireAdmin, async (req, res) => {
     try {
       const { id } = req.params;
       const { isBreaking } = req.body;
@@ -235,7 +305,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // AI Content Generation endpoints
-  app.post("/api/admin/ai/improve-article/:id", async (req, res) => {
+  app.post("/api/admin/ai/improve-article/:id", requireAdmin, async (req, res) => {
     try {
       if (!process.env.GEMINI_API_KEY) {
         return res.status(400).json({ error: "GEMINI_API_KEY not configured" });
@@ -258,7 +328,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/admin/ai/generate-article", async (req, res) => {
+  app.post("/api/admin/ai/generate-article", requireAdmin, async (req, res) => {
     try {
       if (!process.env.GEMINI_API_KEY) {
         return res.status(400).json({ error: "GEMINI_API_KEY not configured" });

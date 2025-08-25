@@ -9,6 +9,8 @@ import Home from "@/pages/home";
 import CategoryPage from "@/pages/category";
 import ArticlePage from "@/pages/article";
 import AdminPage from "@/pages/admin";
+import LoginPage from "@/pages/login";
+import RegisterPage from "@/pages/register";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -18,6 +20,8 @@ function Router() {
       <Route path="/category/:slug" component={CategoryPage} />
       <Route path="/article/:slug" component={ArticlePage} />
       <Route path="/admin" component={AdminPage} />
+      <Route path="/login" component={LoginPage} />
+      <Route path="/register" component={RegisterPage} />
       <Route component={NotFound} />
     </Switch>
   );
