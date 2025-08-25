@@ -25,6 +25,7 @@ export interface IStorage {
   updateArticleViews(id: string): Promise<void>;
   updateArticleLikes(id: string, increment: boolean): Promise<void>;
   searchArticles(query: string, limit?: number): Promise<ArticleWithCategory[]>;
+  getArticleBySourceUrl(sourceUrl: string): Promise<ArticleWithCategory | undefined>;
 
   // RSS Feed methods
   getAllRssFeeds(): Promise<RssFeed[]>;
@@ -200,9 +201,9 @@ export class MemStorage implements IStorage {
           id: randomUUID(),
           title: articleData.title,
           slug: articleData.slug,
-          description: articleData.description,
-          content: articleData.content,
-          imageUrl: articleData.imageUrl,
+          description: articleData.description ?? null,
+          content: articleData.content ?? null,
+          imageUrl: articleData.imageUrl ?? null,
           sourceUrl: articleData.sourceUrl,
           sourceName: articleData.sourceName,
           categoryId: category.id,
@@ -368,6 +369,14 @@ export class MemStorage implements IStorage {
     return this.enrichArticlesWithCategories(articles);
   }
 
+  async getArticleBySourceUrl(sourceUrl: string): Promise<ArticleWithCategory | undefined> {
+    const article = Array.from(this.articles.values()).find(a => a.sourceUrl === sourceUrl);
+    if (!article) return undefined;
+    
+    const enriched = await this.enrichArticlesWithCategories([article]);
+    return enriched[0];
+  }
+
   private async enrichArticlesWithCategories(articles: Article[]): Promise<ArticleWithCategory[]> {
     return articles.map(article => {
       const category = this.categories.get(article.categoryId);
@@ -392,6 +401,7 @@ export class MemStorage implements IStorage {
     const feed: RssFeed = {
       id,
       ...insertFeed,
+      isActive: insertFeed.isActive || "true",
       createdAt: new Date(),
       lastFetchedAt: null
     };
@@ -413,6 +423,7 @@ export class MemStorage implements IStorage {
     const newsletter: Newsletter = {
       id,
       ...insertNewsletter,
+      isActive: insertNewsletter.isActive || "true",
       createdAt: new Date()
     };
     this.newsletters.set(id, newsletter);

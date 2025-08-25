@@ -106,10 +106,12 @@ export class RssParser {
         
         const title = this.cleanContent(item.title[0]);
         const slug = this.createSlug(title);
+        const sourceUrl = item.link[0];
         
-        // Check if article already exists by slug
-        const existingArticle = await storage.getArticleBySlug(slug);
+        // Check if article already exists by sourceUrl (more reliable than slug)
+        const existingArticle = await storage.getArticleBySourceUrl(sourceUrl);
         if (existingArticle) {
+          console.log(`Article already exists, skipping: ${sourceUrl}`);
           continue;
         }
         
@@ -162,7 +164,7 @@ export class RssParser {
           description: enhancedArticle.description,
           content: enhancedArticle.content,
           imageUrl,
-          sourceUrl: item.link[0],
+          sourceUrl,
           sourceName,
           categoryId,
           publishedAt,

@@ -252,6 +252,24 @@ export class DbStorage implements IStorage {
     }));
   }
 
+  async getArticleBySourceUrl(sourceUrl: string): Promise<ArticleWithCategory | undefined> {
+    const result = await this.db
+      .select({
+        article: articles,
+        category: categories
+      })
+      .from(articles)
+      .innerJoin(categories, eq(articles.categoryId, categories.id))
+      .where(eq(articles.sourceUrl, sourceUrl));
+
+    if (!result[0]) return undefined;
+    
+    return {
+      ...result[0].article,
+      category: result[0].category
+    };
+  }
+
   // RSS Feed methods
   async getAllRssFeeds(): Promise<RssFeed[]> {
     return await this.db.select().from(rssFeeds).orderBy(asc(rssFeeds.name));

@@ -10,7 +10,7 @@ import { z } from "zod";
 
 // Use memory storage if DATABASE_URL is not available, otherwise use DB storage
 const storage = process.env.DATABASE_URL ? new DbStorage() : new MemStorage();
-const authService = new AuthService(storage);
+const authService = new AuthService(storage as any);
 
 // Extend express-session types
 declare module 'express-session' {
@@ -436,7 +436,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const { aiGenerator } = await import("./services/ai-generator");
-      const improved = await aiGenerator.improveExistingArticle(article);
+      const improved = await aiGenerator?.improveExistingArticle(article);
       
       res.json(improved);
     } catch (error) {
@@ -459,7 +459,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const { aiGenerator } = await import("./services/ai-generator");
-      const generated = await aiGenerator.generateOriginalArticle(category);
+      const generated = await aiGenerator?.generateOriginalArticle(category);
       
       res.json(generated);
     } catch (error) {

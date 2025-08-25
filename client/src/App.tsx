@@ -12,6 +12,7 @@ import AdminPage from "@/pages/admin";
 import LoginPage from "@/pages/login";
 import RegisterPage from "@/pages/register";
 import NotFound from "@/pages/not-found";
+import SearchResults from "@/pages/search-results";
 
 function Router() {
   return (
@@ -22,6 +23,7 @@ function Router() {
       <Route path="/admin" component={AdminPage} />
       <Route path="/login" component={LoginPage} />
       <Route path="/register" component={RegisterPage} />
+      <Route path="/search" component={SearchResults} />
       <Route component={NotFound} />
     </Switch>
   );
