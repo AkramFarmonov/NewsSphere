@@ -76,9 +76,11 @@ export default function Header() {
           <div className="flex items-center justify-between">
             {/* Logo */}
             <Link href="/" className="flex items-center" data-testid="link-logo">
-              <div className="text-2xl font-bold text-primary">
-                <i className="fas fa-newspaper mr-2"></i>RealNews
-              </div>
+              <img 
+                src="/logo.png" 
+                alt="RealNews" 
+                className="h-10 w-auto"
+              />
             </Link>
 
             {/* Desktop Navigation */}
