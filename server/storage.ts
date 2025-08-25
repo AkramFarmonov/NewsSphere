@@ -332,6 +332,11 @@ export class MemStorage implements IStorage {
     const article: Article = {
       id,
       ...insertArticle,
+      description: insertArticle.description ?? null,
+      content: insertArticle.content ?? null,
+      imageUrl: insertArticle.imageUrl ?? null,
+      isBreaking: insertArticle.isBreaking ?? "false",
+      isFeatured: insertArticle.isFeatured ?? "false",
       createdAt: new Date(),
       views: 0,
       likes: 0
