@@ -71,11 +71,30 @@ export class TelegramBot {
   private formatArticleCaption(article: ArticleWithCategory): string {
     const categoryIcon = this.getCategoryIcon(article.category.name);
     
+    // To'liq batafsil mazmun - qisqartirmasdan
+    let fullContent = "";
+    
+    // Qisqacha tavsif
+    if (article.description) {
+      fullContent += `${article.description}\n\n`;
+    }
+    
+    // To'liq maqola mazmuni
+    if (article.content && article.content.length > 50) {
+      // Agar mazmun juda uzun bo'lsa, Telegram limitiga mos qilamiz (4096 character)
+      const contentToAdd = article.content.length > 3000 ? 
+        article.content.substring(0, 3000) + "...\n\n📖 To'liq o'qish uchun havolaga bosing:" : 
+        article.content + "\n\n";
+      fullContent += contentToAdd;
+    }
+    
     const caption = `<b>${article.title}</b>
 
-${article.description ? article.description.substring(0, 280) + "..." : ""}
+${fullContent}
 
-${categoryIcon} <b>${article.category.name}</b> | ${this.formatDate(article.publishedAt)}`;
+${categoryIcon} <b>${article.category.name}</b> | ${this.formatDate(article.publishedAt)}
+
+📊 Ko'rishlar: ${article.views || 0} | 👍 ${article.likes || 0}`;
 
     return caption;
   }
