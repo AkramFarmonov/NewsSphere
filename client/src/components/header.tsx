@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
-import { Search, Menu, X, Calendar, Thermometer } from "lucide-react";
+import { Search, Menu, X, Calendar, Thermometer, DollarSign } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useCategories, useSearchArticles } from "@/hooks/use-news";
 import { PushNotificationButton } from "@/components/push-notification-button";
 import { useTranslation } from 'react-i18next';
+import { useWeatherData, useCurrencyData, useTashkentTime } from "@/hooks/use-real-time-data";
 
 export default function Header() {
   const [location] = useLocation();
@@ -16,11 +17,21 @@ export default function Header() {
 
   const { data: categories = [] } = useCategories();
   const { data: searchResults = [] } = useSearchArticles(searchQuery, 5);
+  
+  // Real vaqt ma'lumotlari
+  const weather = useWeatherData();
+  const currency = useCurrencyData();
+  const tashkentTime = useTashkentTime();
 
-  const currentDate = new Date().toLocaleDateString("uz-UZ", {
+  const currentDate = tashkentTime.toLocaleDateString("uz-UZ", {
     year: "numeric",
     month: "long",
     day: "numeric"
+  });
+
+  const currentTime = tashkentTime.toLocaleTimeString("uz-UZ", {
+    hour: "2-digit",
+    minute: "2-digit"
   });
 
   const toggleMobileMenu = () => {
@@ -173,15 +184,19 @@ export default function Header() {
               ))}
             </div>
 
-            {/* Date and Weather */}
+            {/* Real-time Data */}
             <div className="hidden lg:flex items-center space-x-4 text-sm text-gray-500">
-              <span className="flex items-center">
+              <span className="flex items-center" title="Toshkent vaqti">
                 <Calendar className="w-4 h-4 mr-1" />
-                {currentDate}
+                {currentDate} • {currentTime}
               </span>
-              <span className="flex items-center">
+              <span className="flex items-center" title={`Ob-havo: ${weather.condition}`}>
                 <Thermometer className="w-4 h-4 mr-1" />
-                Toshkent +5°C
+                {weather.loading ? "..." : weather.error ? "---" : `${weather.temperature > 0 ? '+' : ''}${weather.temperature}°C`}
+              </span>
+              <span className="flex items-center" title="USD kursi (O'zbekiston Markaziy Banki)">
+                <DollarSign className="w-4 h-4 mr-1" />
+                {currency.loading ? "..." : currency.error ? "---" : `1$ = ${currency.rate.toLocaleString()} so'm`}
               </span>
             </div>
           </div>
