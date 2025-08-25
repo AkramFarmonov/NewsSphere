@@ -257,6 +257,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Debug Telegram configuration
+  app.get("/api/admin/telegram-info", requireAdmin, async (_req, res) => {
+    try {
+      const chatId = process.env.TELEGRAM_CHAT_ID || "";
+      const botToken = process.env.TELEGRAM_BOT_TOKEN || "";
+      
+      if (!botToken) {
+        return res.status(400).json({ error: "TELEGRAM_BOT_TOKEN not configured" });
+      }
+
+      // Get bot info
+      const botResponse = await fetch(`https://api.telegram.org/bot${botToken}/getMe`);
+      const botInfo = await botResponse.json();
+
+      // Try to get chat info
+      let chatInfo = null;
+      if (chatId) {
+        try {
+          const chatResponse = await fetch(`https://api.telegram.org/bot${botToken}/getChat?chat_id=${chatId}`);
+          const chatData = await chatResponse.json();
+          chatInfo = chatData;
+        } catch (error) {
+          console.error("Error getting chat info:", error);
+        }
+      }
+
+      res.json({
+        botInfo: botInfo,
+        currentChatId: chatId,
+        chatInfo: chatInfo,
+        instructions: {
+          forChannel: "Channel ID format: -100xxxxxxxxx (starts with -100)",
+          forGroup: "Group ID format: -xxxxxxxxx (starts with -)",
+          forPrivate: "Private chat ID: positive number",
+          howToGetChannelId: "1. Add bot to channel as admin, 2. Send message to channel, 3. Visit https://api.telegram.org/bot{YOUR_BOT_TOKEN}/getUpdates"
+        }
+      });
+    } catch (error) {
+      console.error("Error getting Telegram info:", error);
+      res.status(500).json({ error: "Failed to get Telegram info" });
+    }
+  });
+
   // Send article to Telegram manually
   app.post("/api/admin/send-to-telegram/:id", requireAdmin, async (req, res) => {
     try {

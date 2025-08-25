@@ -197,13 +197,20 @@ ${article.description ? article.description.substring(0, 250) + "..." : ""}
 
     const testMessage: TelegramMessage = {
       chat_id: this.chatId,
-      text: "🤖 RealNews Bot test xabari - Bot muvaffaqiyatli ulandi!"
+      text: `🤖 RealNews Bot test xabari - Bot muvaffaqiyatli ulandi!
+      
+📊 Konfiguratsiya:
+Chat ID: ${this.chatId}
+Vaqt: ${new Date().toLocaleString("uz-UZ")}
+
+${this.chatId.startsWith("-100") ? "✅ Channel ID formati to'g'ri" : "⚠️ Bu shaxsiy chat yoki guruh ID'si"}`
     };
 
     const success = await this.sendRequest("sendMessage", testMessage);
     
     if (success) {
       console.log("✅ Telegram Bot muvaffaqiyatli ulandi!");
+      console.log(`📍 Xabar yuborilgan chat: ${this.chatId}`);
     } else {
       console.error("❌ Telegram Bot ulanishida xatolik!");
     }
