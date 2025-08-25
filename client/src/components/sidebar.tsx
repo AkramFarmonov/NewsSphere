@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useTrendingArticles } from "@/hooks/use-news";
+import { useWeatherData } from "@/hooks/use-real-time-data";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -25,6 +26,7 @@ export default function Sidebar() {
   const { data: trendingArticles = [], isLoading } = useTrendingArticles(5);
   const [isNewsletterSubmitted, setIsNewsletterSubmitted] = useState(false);
   const { toast } = useToast();
+  const weather = useWeatherData();
 
   const newsletterForm = useForm<NewsletterFormData>({
     resolver: zodResolver(newsletterFormSchema),
@@ -124,20 +126,30 @@ export default function Sidebar() {
           Ob-havo
         </h3>
         <div className="text-center">
-          <div className="text-3xl font-bold mb-2" data-testid="current-temperature">+5°C</div>
-          <div className="text-blue-100 mb-4" data-testid="weather-description">Toshkent, bulutli</div>
+          <div className="text-3xl font-bold mb-2" data-testid="current-temperature">
+            {weather.loading ? "..." : weather.error ? "---" : `${weather.temperature > 0 ? '+' : ''}${weather.temperature}°C`}
+          </div>
+          <div className="text-blue-100 mb-4" data-testid="weather-description">
+            {weather.loading ? "Yuklanmoqda..." : weather.error ? "Ma'lumot olinmadi" : `${weather.location}, ${weather.condition}`}
+          </div>
           <div className="grid grid-cols-3 gap-2 text-sm">
             <div className="text-center">
               <div className="text-blue-100">Bugun</div>
-              <div className="font-medium" data-testid="weather-today">+7°C</div>
+              <div className="font-medium" data-testid="weather-today">
+                {weather.loading ? "..." : weather.error ? "---" : `${weather.forecast.today > 0 ? '+' : ''}${weather.forecast.today}°C`}
+              </div>
             </div>
             <div className="text-center">
               <div className="text-blue-100">Ertaga</div>
-              <div className="font-medium" data-testid="weather-tomorrow">+3°C</div>
+              <div className="font-medium" data-testid="weather-tomorrow">
+                {weather.loading ? "..." : weather.error ? "---" : `${weather.forecast.tomorrow > 0 ? '+' : ''}${weather.forecast.tomorrow}°C`}
+              </div>
             </div>
             <div className="text-center">
               <div className="text-blue-100">Indinga</div>
-              <div className="font-medium" data-testid="weather-dayafter">+1°C</div>
+              <div className="font-medium" data-testid="weather-dayafter">
+                {weather.loading ? "..." : weather.error ? "---" : `${weather.forecast.dayAfter > 0 ? '+' : ''}${weather.forecast.dayAfter}°C`}
+              </div>
             </div>
           </div>
         </div>
