@@ -10,6 +10,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { updateSEOTags } from "@/lib/seo";
 import { 
@@ -40,6 +42,7 @@ interface AdminStats {
 export default function AdminPage() {
   const [, setLocation] = useLocation();
   const [selectedCategory, setSelectedCategory] = useState("all");
+  const [editingArticle, setEditingArticle] = useState<Article | null>(null);
   const [newArticle, setNewArticle] = useState({
     title: "",
     description: "",
@@ -210,6 +213,44 @@ export default function AdminPage() {
     }
   });
 
+  const updateArticleMutation = useMutation({
+    mutationFn: (data: { id: string; articleData: any }) => 
+      apiRequest("PUT", `/api/admin/articles/${data.id}`, data.articleData),
+    onSuccess: () => {
+      toast({
+        title: "Muvaffaqiyatli!",
+        description: "Maqola muvaffaqiyatli yangilandi",
+      });
+      setEditingArticle(null);
+      queryClient.invalidateQueries({ queryKey: ["/api/articles"] });
+    },
+    onError: () => {
+      toast({
+        title: "Xatolik",
+        description: "Maqolani yangilashda xatolik yuz berdi",
+        variant: "destructive",
+      });
+    }
+  });
+
+  const deleteArticleMutation = useMutation({
+    mutationFn: (id: string) => apiRequest("DELETE", `/api/admin/articles/${id}`),
+    onSuccess: () => {
+      toast({
+        title: "Muvaffaqiyatli!",
+        description: "Maqola muvaffaqiyatli o'chirildi",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/articles"] });
+    },
+    onError: () => {
+      toast({
+        title: "Xatolik",
+        description: "Maqolani o'chirishda xatolik yuz berdi",
+        variant: "destructive",
+      });
+    }
+  });
+
   useEffect(() => {
     updateSEOTags({
       title: "Admin Panel - RealNews",
@@ -267,6 +308,37 @@ export default function AdminPage() {
     }
 
     createFeedMutation.mutate(newFeed);
+  };
+
+  const handleEditArticle = (article: Article) => {
+    setEditingArticle(article);
+  };
+
+  const handleUpdateArticle = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingArticle) return;
+
+    const slug = editingArticle.title
+      .toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, '')
+      .replace(/\s+/g, '-')
+      .trim();
+
+    updateArticleMutation.mutate({
+      id: editingArticle.id,
+      articleData: {
+        ...editingArticle,
+        slug,
+        isBreaking: editingArticle.isBreaking === "true" ? "true" : "false",
+        isFeatured: editingArticle.isFeatured === "true" ? "true" : "false"
+      }
+    });
+  };
+
+  const handleDeleteArticle = (id: string, title: string) => {
+    if (window.confirm(`Haqiqatan ham "${title}" maqolasini o'chirmoqchimisiz? Bu harakat bekor qilinmaydi.`)) {
+      deleteArticleMutation.mutate(id);
+    }
   };
 
   return (
@@ -367,6 +439,22 @@ export default function AdminPage() {
                       </div>
                     </div>
                     <div className="flex items-center space-x-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleEditArticle(article)}
+                        data-testid={`edit-article-${article.id}`}
+                      >
+                        <Edit className="h-4 w-4 text-blue-500" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDeleteArticle(article.id, article.title)}
+                        data-testid={`delete-article-${article.id}`}
+                      >
+                        <Trash2 className="h-4 w-4 text-red-500" />
+                      </Button>
                       <Button
                         variant="ghost"
                         size="sm"
@@ -714,6 +802,142 @@ export default function AdminPage() {
           </div>
         </TabsContent>
       </Tabs>
+
+      {/* Edit Article Modal */}
+      <Dialog open={!!editingArticle} onOpenChange={() => setEditingArticle(null)}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Maqolani Tahrirlash</DialogTitle>
+            <DialogDescription>
+              Maqola ma'lumotlarini yangilash uchun quyidagi forma'ni to'ldiring
+            </DialogDescription>
+          </DialogHeader>
+          
+          {editingArticle && (
+            <form onSubmit={handleUpdateArticle} className="space-y-4">
+              <div>
+                <Label htmlFor="edit-title">Sarlavha</Label>
+                <Input
+                  id="edit-title"
+                  value={editingArticle.title}
+                  onChange={(e) => setEditingArticle(prev => prev ? { ...prev, title: e.target.value } : null)}
+                  required
+                  data-testid="input-edit-title"
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="edit-description">Qisqacha tavsif</Label>
+                <Textarea
+                  id="edit-description"
+                  value={editingArticle.description || ""}
+                  onChange={(e) => setEditingArticle(prev => prev ? { ...prev, description: e.target.value } : null)}
+                  rows={3}
+                  data-testid="textarea-edit-description"
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="edit-content">Maqola matni</Label>
+                <Textarea
+                  id="edit-content"
+                  value={editingArticle.content || ""}
+                  onChange={(e) => setEditingArticle(prev => prev ? { ...prev, content: e.target.value } : null)}
+                  rows={6}
+                  data-testid="textarea-edit-content"
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="edit-imageUrl">Rasm URL manzili</Label>
+                <Input
+                  id="edit-imageUrl"
+                  value={editingArticle.imageUrl || ""}
+                  onChange={(e) => setEditingArticle(prev => prev ? { ...prev, imageUrl: e.target.value } : null)}
+                  data-testid="input-edit-image"
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="edit-sourceUrl">Manba URL manzili</Label>
+                <Input
+                  id="edit-sourceUrl"
+                  value={editingArticle.sourceUrl || ""}
+                  onChange={(e) => setEditingArticle(prev => prev ? { ...prev, sourceUrl: e.target.value } : null)}
+                  data-testid="input-edit-source-url"
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="edit-sourceName">Manba nomi</Label>
+                <Input
+                  id="edit-sourceName"
+                  value={editingArticle.sourceName || ""}
+                  onChange={(e) => setEditingArticle(prev => prev ? { ...prev, sourceName: e.target.value } : null)}
+                  data-testid="input-edit-source-name"
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="edit-category">Kategoriya</Label>
+                <Select 
+                  value={editingArticle.categoryId} 
+                  onValueChange={(value) => setEditingArticle(prev => prev ? { ...prev, categoryId: value } : null)}
+                >
+                  <SelectTrigger data-testid="select-edit-category">
+                    <SelectValue placeholder="Kategoriyani tanlang" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categories.map((category) => (
+                      <SelectItem key={category.id} value={category.id}>
+                        {category.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    checked={editingArticle.isFeatured === "true"}
+                    onCheckedChange={(checked) => setEditingArticle(prev => prev ? { ...prev, isFeatured: checked ? "true" : "false" } : null)}
+                    data-testid="switch-edit-featured"
+                  />
+                  <Label htmlFor="edit-featured">Asosiy maqola</Label>
+                </div>
+                
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    checked={editingArticle.isBreaking === "true"}
+                    onCheckedChange={(checked) => setEditingArticle(prev => prev ? { ...prev, isBreaking: checked ? "true" : "false" } : null)}
+                    data-testid="switch-edit-breaking"
+                  />
+                  <Label htmlFor="edit-breaking">Tezkor yangilik</Label>
+                </div>
+              </div>
+              
+              <div className="flex justify-end space-x-2 pt-4">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setEditingArticle(null)}
+                  data-testid="button-cancel-edit"
+                >
+                  Bekor qilish
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={updateArticleMutation.isPending}
+                  data-testid="button-save-edit"
+                >
+                  {updateArticleMutation.isPending ? "Saqlanmoqda..." : "Saqlash"}
+                </Button>
+              </div>
+            </form>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

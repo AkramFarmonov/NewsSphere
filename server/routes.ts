@@ -633,6 +633,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Update article (full edit)
+  app.put("/api/admin/articles/:id", requireAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const articleData = req.body;
+      const updatedArticle = await storage.updateArticle(id, articleData);
+      res.json(updatedArticle);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Failed to update article";
+      res.status(500).json({ error: message });
+    }
+  });
+
+  // Delete article
+  app.delete("/api/admin/articles/:id", requireAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      await storage.deleteArticle(id);
+      res.json({ success: true, message: "Article deleted successfully" });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Failed to delete article";
+      res.status(500).json({ error: message });
+    }
+  });
+
   // AI Content Generation endpoints
   app.post("/api/admin/ai/improve-article/:id", requireAdmin, async (req, res) => {
     try {

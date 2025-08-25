@@ -65,6 +65,8 @@ export interface IStorage {
   updateArticleBreaking(id: string, isBreaking: string): Promise<void>;
   updateArticleImage(id: string, imageUrl: string): Promise<void>;
   updateArticleWithImage(id: string, imageUrl: string, imageAttribution?: string, imageAuthor?: string, imageAuthorUrl?: string): Promise<void>;
+  updateArticle(id: string, data: Partial<InsertArticle>): Promise<Article>;
+  deleteArticle(id: string): Promise<void>;
   getCategoryById(id: string): Promise<Category | undefined>;
 }
 
@@ -701,6 +703,20 @@ export class MemStorage implements IStorage {
 
   async deleteStoryItem(id: string): Promise<void> {
     this.storyItems.delete(id);
+  }
+
+  // Article admin methods
+  async updateArticle(id: string, data: Partial<InsertArticle>): Promise<Article> {
+    const article = this.articles.get(id);
+    if (!article) throw new Error("Article not found");
+
+    const updatedArticle = { ...article, ...data };
+    this.articles.set(id, updatedArticle);
+    return updatedArticle;
+  }
+
+  async deleteArticle(id: string): Promise<void> {
+    this.articles.delete(id);
   }
 }
 
