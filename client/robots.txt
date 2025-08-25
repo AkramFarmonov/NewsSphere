@@ -1,0 +1,19 @@
+User-agent: *
+Allow: /
+
+# Disallow admin pages
+Disallow: /admin/
+Disallow: /login
+Disallow: /register
+
+# Allow important pages
+Allow: /article/
+Allow: /category/
+Allow: /stories
+Allow: /search
+
+# Sitemap location
+Sitemap: https://realnews.uz/sitemap.xml
+
+# Crawl delay (optional)
+Crawl-delay: 1

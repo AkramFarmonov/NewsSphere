@@ -1,0 +1,36 @@
+Mavzu: "RealNews" Platformasi Uchun To'liq SEO Audit Rejasi
+Salom! Loyihamiz texnik jihatdan deyarli tayyor. Endi unga organik trafikni (qidiruv tizimlaridan keladigan foydalanuvchilar oqimini) maksimal darajada jalb qilish uchun SEO sozlamalarining barchasi to'g'ri ekanligiga ishonch hosil qilishimiz kerak.
+
+Iltimos, quyidagi tekshiruv ro'yxati (checklist) asosida saytni to'liq auditdan o'tkazib, natijalari bo'yicha hisobot bering.
+
+1-Bo'lim: Sahifa SEO'si (On-Page SEO)
+Bu bo'lim har bir sahifaning ichki tuzilishiga tegishli.
+
+1.1. title Teglari: Har bir maqola va sahifaning title tegi unikalmi (bir-birini takrorlamaydimi)? U maqola sarlavhasini o'z ichiga oladimi va ~60 belgidan oshmaydimi?
+
+1.2. meta description Teglari: Har bir sahifa uchun foydalanuvchini qiziqtiradigan, unikal meta description (sahifa tavsifi) generatsiya qilinayaptimi? U ~160 belgidan oshmasligi kerak.
+
+1.3. Sarlavhalar Ierarxiyasi (h1, h2): Har bir maqola sahifasida faqat bitta <h1> tegi (maqola sarlavhasi) ishlatilganmi? Maqola ichidagi kichik sarlavhalar <h2>, <h3> teglari bilan to'g'ri strukturalanganmi?
+
+1.4. Rasm alt Teglari: Saytdagi har bir rasmda (<img> tegi) uning mazmunini tushuntiruvchi alt atributi mavjudmi? Bu qidiruv tizimlariga rasmni "tushunish"ga yordam beradi.
+
+1.5. URL Manzillari (Slugs): Maqolalarning URL manzillari o'qish uchun qulay va kalit so'zlarni o'z ichiga olgan holda generatsiya qilinayaptimi (masalan, /uz/texnologiya/suniy-intellekt-rivojlanishi)?
+
+2-Bo'lim: Texnik SEO
+Bu bo'lim saytning umumiy texnik sozlamalariga tegishli.
+
+2.1. robots.txt Fayli: Loyihada qidiruv tizimlari uchun qaysi sahifalarni indekslash yoki indekslamaslikni ko'rsatuvchi robots.txt fayli mavjudmi? U /admin kabi shaxsiy sahifalarni bloklayaptimi?
+
+2.2. sitemap.xml Fayli: Saytdagi barcha sahifalar (har uchala tilda) ro'yxatini o'z ichiga olgan sitemap.xml fayli avtomatik generatsiya qilinayaptimi? Bu qidiruv tizimlariga yangi kontentni tezda topishga yordam beradi.
+
+2.3. Strukturalangan Ma'lumotlar (Schema Markup): Bu yangilik saytlari uchun juda muhim! Har bir maqola sahifasida Google'ga bu kontent "Yangilik Maqolasi" ekanini bildiruvchi NewsArticle schema.org mikroformatlari qo'shilganmi? Buni Google's Rich Results Test vositasi orqali tekshirish mumkin.
+
+2.4. Yuklanish Tezligi (Page Speed): Saytning yuklanish tezligini Google PageSpeed Insights vositasi orqali tekshiring. Mobil va desktop uchun ko'rsatkichlar qanday? Tezlikni pasaytirayotgan omillar bormi?
+
+3-Bo'lim: Xalqaro SEO (Ko'p tilli saytlar uchun)
+3.1. hreflang Teglari: Har bir sahifaning o'zbek, rus va ingliz tillaridagi versiyalari mavjudligini Google'ga bildirish uchun <head> qismida hreflang atributlari to'g'ri o'rnatilganmi? Bu bir xil kontentning turli tillardagi versiyalarini dublikat sifatida qabul qilinishini oldini oladi.
+
+Hisobot
+Iltimos, har bir band bo'yicha tekshiruv o'tkazib, natijalarni "✅ Bajarilgan", "🟡 Yaxshilash kerak", yoki "❌ Mavjud emas" statuslari bilan qisqacha hisobot ko'rinishida taqdim eting.
+
+Bu audit loyihamizning muvaffaqiyatli bo'lishi uchun eng muhim qadamlardan biridir.

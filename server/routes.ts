@@ -768,6 +768,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Serve robots.txt for SEO
+  app.get("/robots.txt", (_req, res) => {
+    const robotsTxt = `User-agent: *
+Allow: /
+
+# Disallow admin pages
+Disallow: /admin/
+Disallow: /login
+Disallow: /register
+
+# Allow important pages
+Allow: /article/
+Allow: /category/
+Allow: /stories
+Allow: /search
+
+# Sitemap location
+Sitemap: ${process.env.SITE_URL || 'http://localhost:5000'}/sitemap.xml
+
+# Crawl delay (optional)
+Crawl-delay: 1`;
+    
+    res.set('Content-Type', 'text/plain');
+    res.send(robotsTxt);
+  });
+
   // Get sitemap for SEO
   app.get("/sitemap.xml", async (_req, res) => {
     try {

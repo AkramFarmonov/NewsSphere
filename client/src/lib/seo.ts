@@ -75,6 +75,9 @@ export function updateSEOTags(seo: SEOData) {
       }
     });
   }
+
+  // Add hreflang tags for multilingual content
+  addHreflangTags(seo.url);
 }
 
 function updateMetaTag(name: string, content: string, attribute: string = "name") {
@@ -101,6 +104,37 @@ function updateStructuredData(data: any) {
   script.type = "application/ld+json";
   script.textContent = JSON.stringify(data);
   document.head.appendChild(script);
+}
+
+function addHreflangTags(url?: string) {
+  // Remove existing hreflang tags
+  const existingTags = document.querySelectorAll('link[hreflang]');
+  existingTags.forEach(tag => tag.remove());
+
+  if (!url) url = window.location.pathname;
+
+  const languages = [
+    { code: 'uz', name: 'O\'zbek' },
+    { code: 'ru', name: 'Русский' },
+    { code: 'en', name: 'English' }
+  ];
+
+  const baseUrl = window.location.origin;
+
+  languages.forEach(lang => {
+    const link = document.createElement('link');
+    link.rel = 'alternate';
+    link.hreflang = lang.code;
+    link.href = `${baseUrl}${url}?lang=${lang.code}`;
+    document.head.appendChild(link);
+  });
+
+  // Add x-default for main language (Uzbek)
+  const defaultLink = document.createElement('link');
+  defaultLink.rel = 'alternate';
+  defaultLink.hreflang = 'x-default';
+  defaultLink.href = `${baseUrl}${url}`;
+  document.head.appendChild(defaultLink);
 }
 
 export function getDefaultSEO(): SEOData {
