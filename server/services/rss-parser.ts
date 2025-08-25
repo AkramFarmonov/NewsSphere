@@ -1,6 +1,7 @@
 import { parseStringPromise } from 'xml2js';
 import { storage } from '../storage';
 import { aiGenerator } from './ai-generator';
+import { telegramBot } from './telegram-bot';
 import type { InsertArticle } from '@shared/schema';
 
 interface RssItem {
@@ -189,7 +190,22 @@ export class RssParser {
         const articles = await this.parseFeed(feed.url, feed.categoryId, feed.name);
         
         for (const article of articles) {
-          await storage.createArticle(article);
+          const createdArticle = await storage.createArticle(article);
+          
+          // Telegram kanaliga yuborish
+          try {
+            const fullArticle = await storage.getArticleById(createdArticle.id);
+            if (fullArticle) {
+              await telegramBot.sendArticle(fullArticle);
+              
+              // Agar breaking news bo'lsa, alohida yuborish
+              if (fullArticle.isBreaking === "true") {
+                await telegramBot.sendBreakingNews(fullArticle);
+              }
+            }
+          } catch (error) {
+            console.error(`Telegram'ga yuborishda xatolik: ${error}`);
+          }
         }
         
         await storage.updateRssFeedLastFetched(feed.id);

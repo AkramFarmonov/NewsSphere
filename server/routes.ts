@@ -240,6 +240,78 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Test Telegram Bot connection
+  app.post("/api/admin/test-telegram", requireAdmin, async (_req, res) => {
+    try {
+      const { telegramBot } = await import("./services/telegram-bot");
+      const success = await telegramBot.testConnection();
+      
+      if (success) {
+        res.json({ message: "Telegram Bot successfully connected and test message sent!" });
+      } else {
+        res.status(500).json({ error: "Failed to connect to Telegram Bot" });
+      }
+    } catch (error) {
+      console.error("Telegram test error:", error);
+      res.status(500).json({ error: "Failed to test Telegram Bot" });
+    }
+  });
+
+  // Send article to Telegram manually
+  app.post("/api/admin/send-to-telegram/:id", requireAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const article = await storage.getArticleById(id);
+      
+      if (!article) {
+        return res.status(404).json({ error: "Article not found" });
+      }
+
+      const { telegramBot } = await import("./services/telegram-bot");
+      const success = await telegramBot.sendArticle(article);
+      
+      if (success) {
+        res.json({ message: "Article sent to Telegram successfully" });
+      } else {
+        res.status(500).json({ error: "Failed to send article to Telegram" });
+      }
+    } catch (error) {
+      console.error("Send to Telegram error:", error);
+      res.status(500).json({ error: "Failed to send article to Telegram" });
+    }
+  });
+
+  // Test AI translation
+  app.post("/api/admin/test-ai-translation", requireAdmin, async (req, res) => {
+    try {
+      if (!process.env.GEMINI_API_KEY) {
+        return res.status(400).json({ error: "GEMINI_API_KEY not configured" });
+      }
+
+      const { title, content, categoryId } = req.body;
+      
+      if (!title || !content || !categoryId) {
+        return res.status(400).json({ error: "Title, content and categoryId are required" });
+      }
+
+      const category = await storage.getCategoryById(categoryId);
+      if (!category) {
+        return res.status(404).json({ error: "Category not found" });
+      }
+
+      const { aiGenerator } = await import("./services/ai-generator");
+      if (!aiGenerator) {
+        return res.status(500).json({ error: "AI Generator not available" });
+      }
+
+      const result = await aiGenerator.translateAndRewriteArticle(title, content, category);
+      res.json(result);
+    } catch (error) {
+      console.error("AI translation test error:", error);
+      res.status(500).json({ error: "Failed to test AI translation" });
+    }
+  });
+
   // Get all RSS feeds for admin
   app.get("/api/admin/rss-feeds", requireAdmin, async (_req, res) => {
     try {

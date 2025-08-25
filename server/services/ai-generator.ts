@@ -209,6 +209,10 @@ JSON formatida javob bering:
 
   // URL-friendly slug yaratish
   private createSlug(title: string): string {
+    if (!title || typeof title !== 'string') {
+      return 'untitled-' + Date.now();
+    }
+    
     return title
       .toLowerCase()
       .replace(/[^a-z0-9\s-]/g, '') // Faqat harf, raqam va bo'sh joy
