@@ -104,8 +104,6 @@ export default function Sidebar() {
                     </h4>
                   </Link>
                   <div className="flex items-center text-xs text-gray-500">
-                    <span data-testid={`trending-source-${index + 1}`}>{article.sourceName}</span>
-                    <span className="mx-1">•</span>
                     <span>{new Date(article.publishedAt).toLocaleDateString("uz-UZ")}</span>
                   </div>
                 </div>

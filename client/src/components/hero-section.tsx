@@ -73,10 +73,7 @@ export default function HeroSection() {
                   }
                 </p>
               )}
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-500" data-testid="featured-article-source">
-                  {featuredArticle.sourceName}
-                </span>
+              <div className="flex items-center justify-end">
                 <div className="flex items-center space-x-3">
                   <span className="text-gray-400 text-sm" data-testid="featured-article-stats">
                     <i className="far fa-heart mr-1"></i> {featuredArticle.likes || 0}

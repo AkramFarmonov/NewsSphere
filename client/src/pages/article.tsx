@@ -179,10 +179,6 @@ export default function ArticlePage() {
 
               <div className="flex flex-wrap items-center gap-3 sm:gap-6 text-sm text-gray-500 mb-4 sm:mb-6" data-testid="article-meta">
                 <div className="flex items-center">
-                  <User className="w-4 h-4 mr-2" />
-                  <span data-testid="article-source">{article.sourceName}</span>
-                </div>
-                <div className="flex items-center">
                   <Calendar className="w-4 h-4 mr-2" />
                   <time dateTime={article.publishedAt.toString()} data-testid="article-date">
                     {new Date(article.publishedAt).toLocaleDateString("uz-UZ", {

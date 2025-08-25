@@ -106,9 +106,6 @@ export default function NewsCard({
             <h3 className="font-semibold mb-2 hover:text-accent cursor-pointer transition-colors" data-testid={`news-title-${article.id}`}>
               {article.title}
             </h3>
-            <p className="text-sm text-gray-600" data-testid={`news-source-${article.id}`}>
-              {article.sourceName}
-            </p>
           </div>
         </Link>
       </article>
@@ -125,8 +122,6 @@ export default function NewsCard({
             </h4>
           </Link>
           <div className="flex items-center text-xs text-gray-500">
-            <span data-testid={`news-source-${article.id}`}>{article.sourceName}</span>
-            <span className="mx-1">•</span>
             <span>{formatTimeAgo(article.publishedAt)}</span>
           </div>
         </div>
@@ -190,10 +185,7 @@ export default function NewsCard({
             </p>
           )}
           {showStats && (
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-gray-500" data-testid={`news-source-${article.id}`}>
-                {article.sourceName}
-              </span>
+            <div className="flex items-center justify-end">
               <div className="flex items-center space-x-2">
                 {article.views > 0 && (
                   <span className="text-gray-400 text-sm flex items-center" data-testid={`news-views-${article.id}`}>
