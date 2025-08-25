@@ -6,7 +6,8 @@ import { Input } from "@/components/ui/input";
 import { useCategories, useSearchArticles } from "@/hooks/use-news";
 import { PushNotificationButton } from "@/components/push-notification-button";
 import { useTranslation } from 'react-i18next';
-import { useWeatherData, useCurrencyData, useTashkentTime } from "@/hooks/use-real-time-data";
+import { useCurrencyData } from "@/hooks/use-real-time-data";
+import { WeatherWidget } from "@/components/weather-widget";
 
 export default function Header() {
   const [location] = useLocation();
@@ -19,20 +20,7 @@ export default function Header() {
   const { data: searchResults = [] } = useSearchArticles(searchQuery, 5);
   
   // Real vaqt ma'lumotlari
-  const weather = useWeatherData();
   const currency = useCurrencyData();
-  const tashkentTime = useTashkentTime();
-
-  const currentDate = tashkentTime.toLocaleDateString("uz-UZ", {
-    year: "numeric",
-    month: "long",
-    day: "numeric"
-  });
-
-  const currentTime = tashkentTime.toLocaleTimeString("uz-UZ", {
-    hour: "2-digit",
-    minute: "2-digit"
-  });
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -190,16 +178,20 @@ export default function Header() {
         </nav>
 
         {/* Real-time Data Bar */}
-        <div className="py-2 border-t border-gray-100 bg-gray-50">
-          <div className="flex items-center justify-center space-x-6 text-sm text-gray-600">
-            <span className="flex items-center" title={`Ob-havo: ${weather.condition}`}>
-              <Thermometer className="w-4 h-4 mr-1" />
-              {weather.loading ? "..." : weather.error ? "---" : `${weather.temperature > 0 ? '+' : ''}${weather.temperature}°C`}
-            </span>
-            <span className="flex items-center" title="USD kursi (O'zbekiston Markaziy Banki)">
-              <DollarSign className="w-4 h-4 mr-1" />
-              {currency.loading ? "..." : currency.error ? "---" : `1$ = ${currency.rate.toLocaleString()} so'm`}
-            </span>
+        <div className="py-4 border-t border-gray-100 bg-gray-50">
+          <div className="flex items-center justify-center space-x-6">
+            <WeatherWidget />
+            <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+              <div className="flex items-center space-x-2 text-gray-600">
+                <DollarSign className="w-5 h-5 text-green-600" />
+                <div>
+                  <div className="text-sm font-medium">USD kursi</div>
+                  <div className="text-lg font-bold">
+                    {currency.loading ? "..." : currency.error ? "---" : `1$ = ${currency.rate.toLocaleString()} so'm`}
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>

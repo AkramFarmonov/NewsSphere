@@ -3,6 +3,12 @@ import { useState, useEffect } from 'react';
 interface WeatherData {
   temperature: number;
   condition: string;
+  location: string;
+  forecast: {
+    today: number;
+    tomorrow: number;
+    dayAfter: number;
+  };
   loading: boolean;
   error: string | null;
 }
@@ -17,6 +23,12 @@ export function useWeatherData() {
   const [weather, setWeather] = useState<WeatherData>({
     temperature: 0,
     condition: '',
+    location: 'Toshkent',
+    forecast: {
+      today: 0,
+      tomorrow: 0,
+      dayAfter: 0
+    },
     loading: true,
     error: null
   });
@@ -26,17 +38,24 @@ export function useWeatherData() {
       try {
         // Toshkent koordinatalari: 41.31°N, 69.28°E
         const response = await fetch(
-          'https://api.open-meteo.com/v1/forecast?latitude=41.31&longitude=69.28&current_weather=true&timezone=Asia%2FTashkent'
+          'https://api.open-meteo.com/v1/forecast?latitude=41.31&longitude=69.28&current_weather=true&daily=temperature_2m_max&timezone=Asia%2FTashkent&forecast_days=3'
         );
         
         if (!response.ok) throw new Error('Weather API failed');
         
         const data = await response.json();
         const currentWeather = data.current_weather;
+        const dailyTemps = data.daily.temperature_2m_max;
         
         setWeather({
           temperature: Math.round(currentWeather.temperature),
           condition: getWeatherCondition(currentWeather.weathercode),
+          location: 'Toshkent',
+          forecast: {
+            today: Math.round(dailyTemps[0]),
+            tomorrow: Math.round(dailyTemps[1]),
+            dayAfter: Math.round(dailyTemps[2])
+          },
           loading: false,
           error: null
         });
