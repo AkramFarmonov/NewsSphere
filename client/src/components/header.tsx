@@ -172,24 +172,20 @@ export default function Header() {
               ))}
             </div>
 
-            {/* Navigation actions placeholder */}
-            <div></div>
+            {/* Real-time Data */}
+            <div className="hidden lg:flex items-center space-x-4 text-sm text-gray-500">
+              <span className="flex items-center" title={`Ob-havo: ${weather.condition}`}>
+                <Thermometer className="w-4 h-4 mr-1" />
+                {weather.loading ? "..." : weather.error ? "---" : `${weather.temperature > 0 ? '+' : ''}${weather.temperature}°C`}
+              </span>
+              <span className="flex items-center" title="USD kursi (O'zbekiston Markaziy Banki)">
+                <DollarSign className="w-4 h-4 mr-1" />
+                {currency.loading ? "..." : currency.error ? "---" : `1$ = ${currency.rate.toLocaleString()} so'm`}
+              </span>
+            </div>
           </div>
         </nav>
 
-        {/* Real-time Data Bar */}
-        <div className="py-2 border-t border-gray-100 bg-gray-50">
-          <div className="flex items-center justify-center space-x-6 text-sm text-gray-600">
-            <span className="flex items-center" title={`Ob-havo: ${weather.condition}`}>
-              <Thermometer className="w-4 h-4 mr-1" />
-              {weather.loading ? "..." : weather.error ? "---" : `${weather.temperature > 0 ? '+' : ''}${weather.temperature}°C`}
-            </span>
-            <span className="flex items-center" title="USD kursi (O'zbekiston Markaziy Banki)">
-              <DollarSign className="w-4 h-4 mr-1" />
-              {currency.loading ? "..." : currency.error ? "---" : `1$ = ${currency.rate.toLocaleString()} so'm`}
-            </span>
-          </div>
-        </div>
       </div>
 
       {/* Mobile Menu Overlay */}
