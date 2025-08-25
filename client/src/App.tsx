@@ -34,18 +34,23 @@ function Router() {
 function App() {
   console.log("RealNews: App component rendering...");
   return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <div className="min-h-screen flex flex-col bg-neutral">
-          <Header />
-          <div className="flex-1">
-            <Router />
+    <div style={{ backgroundColor: 'red', color: 'white', padding: '20px', fontSize: '24px' }}>
+      <h1>RealNews Test - Agar bu ko'rinsa, React ishlayapti!</h1>
+      <p>Server holati: Ishlayapti ✓</p>
+      <p>React render: Ishlayapti ✓</p>
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <div className="min-h-screen flex flex-col bg-neutral">
+            <Header />
+            <div className="flex-1">
+              <Router />
+            </div>
+            <Footer />
           </div>
-          <Footer />
-        </div>
-        <Toaster />
-      </TooltipProvider>
-    </QueryClientProvider>
+          <Toaster />
+        </TooltipProvider>
+      </QueryClientProvider>
+    </div>
   );
 }
 
