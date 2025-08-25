@@ -69,65 +69,25 @@ export default function AdminPage() {
     retry: false
   });
 
-  // Redirect to login if not authenticated
-  useEffect(() => {
-    if (!authLoading && (authError || !currentUser)) {
-      toast({
-        title: "Autentifikatsiya kerak",
-        description: "Admin panelga kirish uchun tizimga kiring",
-        variant: "destructive",
-      });
-      setLocation("/login");
-    }
-  }, [authLoading, authError, currentUser, setLocation, toast]);
-
-  // Show loading while checking authentication
-  if (authLoading) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex items-center justify-center min-h-[400px]">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-            <p className="text-muted-foreground">Autentifikatsiya tekshirilmoqda...</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Show login prompt if not authenticated
-  if (authError || !currentUser) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex items-center justify-center min-h-[400px]">
-          <div className="text-center">
-            <LogIn className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-            <h2 className="text-xl font-semibold mb-2">Autentifikatsiya kerak</h2>
-            <p className="text-muted-foreground mb-4">Admin panelga kirish uchun tizimga kiring</p>
-            <Button onClick={() => setLocation("/login")}>
-              Kirish sahifasiga o'tish
-            </Button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Queries
+  // Queries - always call hooks in the same order
   const { data: articles = [] } = useQuery<Article[]>({
-    queryKey: ["/api/articles", { limit: 100 }]
+    queryKey: ["/api/articles", { limit: 100 }],
+    enabled: !!currentUser
   });
 
   const { data: categories = [] } = useQuery<Category[]>({
-    queryKey: ["/api/categories"]
+    queryKey: ["/api/categories"],
+    enabled: !!currentUser
   });
 
   const { data: feeds = [] } = useQuery<RssFeed[]>({
-    queryKey: ["/api/admin/rss-feeds"]
+    queryKey: ["/api/admin/rss-feeds"],
+    enabled: !!currentUser
   });
 
   const { data: newsletters = [] } = useQuery<Newsletter[]>({
-    queryKey: ["/api/admin/newsletters"]
+    queryKey: ["/api/admin/newsletters"],
+    enabled: !!currentUser
   });
 
   // Mutations
@@ -251,6 +211,18 @@ export default function AdminPage() {
     }
   });
 
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (!authLoading && (authError || !currentUser)) {
+      toast({
+        title: "Autentifikatsiya kerak",
+        description: "Admin panelga kirish uchun tizimga kiring",
+        variant: "destructive",
+      });
+      setLocation("/login");
+    }
+  }, [authLoading, authError, currentUser, setLocation, toast]);
+
   useEffect(() => {
     updateSEOTags({
       title: "Admin Panel - RealNews",
@@ -258,6 +230,38 @@ export default function AdminPage() {
       type: "website"
     });
   }, []);
+
+  // Show loading while checking authentication
+  if (authLoading) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+            <p className="text-muted-foreground">Autentifikatsiya tekshirilmoqda...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show login prompt if not authenticated
+  if (authError || !currentUser) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <LogIn className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+            <h2 className="text-xl font-semibold mb-2">Autentifikatsiya kerak</h2>
+            <p className="text-muted-foreground mb-4">Admin panelga kirish uchun tizimga kiring</p>
+            <Button onClick={() => setLocation("/login")}>
+              Kirish sahifasiga o'tish
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const stats: AdminStats = {
     totalArticles: articles.length,
