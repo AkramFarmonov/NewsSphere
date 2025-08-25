@@ -180,7 +180,7 @@ export default function Header() {
               </span>
               <span className="flex items-center" title="USD kursi (O'zbekiston Markaziy Banki)">
                 <DollarSign className="w-3 lg:w-4 h-3 lg:h-4 mr-1" />
-                {currency.loading ? "..." : currency.error ? "---" : `1$ = ${Math.round(currency.rate / 1000)}k so'm`}
+                {currency.loading ? "..." : currency.error ? "---" : `1$ = ${Math.round(currency.rate).toLocaleString('uz-UZ')} so'm`}
               </span>
             </div>
           </div>
