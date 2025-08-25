@@ -36,20 +36,38 @@ export function useWeatherData() {
   useEffect(() => {
     const fetchWeather = async () => {
       try {
-        // Toshkent koordinatalari: 41.31°N, 69.28°E
+        // Toshkent koordinatalari: 41.2995°N, 69.2401°E (aniqroq)
         const response = await fetch(
-          'https://api.open-meteo.com/v1/forecast?latitude=41.31&longitude=69.28&current_weather=true&daily=temperature_2m_max&timezone=Asia%2FTashkent&forecast_days=3'
+          'https://api.open-meteo.com/v1/forecast?latitude=41.2995&longitude=69.2401&current=temperature_2m,weather_code&hourly=temperature_2m&daily=temperature_2m_max&timezone=Asia%2FTashkent&forecast_days=3'
         );
         
         if (!response.ok) throw new Error('Weather API failed');
         
         const data = await response.json();
-        const currentWeather = data.current_weather;
+        const currentTemp = data.current.temperature_2m;
+        const currentWeatherCode = data.current.weather_code;
         const dailyTemps = data.daily.temperature_2m_max;
         
+        // Hozirgi vaqtga mos haroratni olish (kun davomida yuqori harorat)
+        const now = new Date();
+        const hour = now.getHours();
+        let displayTemp = currentTemp;
+        
+        // Agar kun vaqti bo'lsa, hozirgi soatdagi haroratni olish
+        if (hour >= 6 && hour <= 22 && data.hourly && data.hourly.temperature_2m) {
+          const hourlyTemps = data.hourly.temperature_2m;
+          const hourlyTimes = data.hourly.time;
+          const currentTimeStr = now.toISOString().slice(0, 13) + ':00';
+          const currentHourIndex = hourlyTimes.findIndex((time: string) => time.startsWith(currentTimeStr.slice(0, 13)));
+          
+          if (currentHourIndex >= 0) {
+            displayTemp = hourlyTemps[currentHourIndex];
+          }
+        }
+        
         setWeather({
-          temperature: Math.round(currentWeather.temperature),
-          condition: getWeatherCondition(currentWeather.weathercode),
+          temperature: Math.round(displayTemp),
+          condition: getWeatherCondition(currentWeatherCode),
           location: 'Toshkent',
           forecast: {
             today: Math.round(dailyTemps[0]),
