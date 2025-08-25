@@ -17,12 +17,19 @@ export class AINewsGenerator {
     return !!process.env.GEMINI_API_KEY && !!this.ai;
   }
 
-  // RSS maqolasini o'zbek tiliga tarjima qilish va qayta yozish (YAXSHILANGAN)
-  async translateAndRewriteArticle(
+  // RSS maqolasini 3 tilda (o'zbek, rus, ingliz) tarjima qilish va qayta yozish
+  async translateAndRewriteArticleMultiLang(
     originalTitle: string,
     originalContent: string,
     category: Category
-  ): Promise<{ title: string; description: string; content: string; slug: string; imageKeywords: string[]; tags: string[] }> {
+  ): Promise<{
+    uz: { title: string; description: string; content: string };
+    ru: { title: string; description: string; content: string };
+    en: { title: string; description: string; content: string };
+    slug: string;
+    imageKeywords: string[];
+    tags: string[];
+  }> {
     if (!this.checkApiKey()) {
       throw new Error("Gemini API key not configured");
     }
@@ -32,41 +39,47 @@ export class AINewsGenerator {
       const keywordsFromTitle = this.extractKeywordsFromText(`${originalTitle} ${category.name}`);
       
       const prompt = `
-Sen yuqori malakali o'zbek jurnalisti va SEO-mutaxassisasan. Sening vazifang - quyida berilgan ingliz tilidagi matndan foydalanib, O'zbekiston auditoriyasi uchun qiziqarli, o'qishli va SEO'ga optimallashtirilgan, kamida 350-400 so'zdan iborat to'liq maqola yozish.
+Sen professional ko'p tilli jurnalist va SEO mutaxassisisan. Sening vazifang - quyida berilgan ingliz tilidagi matndan foydalanib, UZ (O'zbek), RU (Rus) va EN (Ingliz) tillarida bir yo'la uchta high-quality maqola yozish.
 
-Maqolaning strukturasi quyidagicha bo'lishi shart:
-1. Qiziqarli Kirish Qismi: O'quvchini jalb qiladigan kirish.
-2. Asosiy Qism: Mavzuni to'liq yoritib beruvchi, kamida 2-3 ta alohida sarlavhali bo'limlar.
-3. Xulosa: Mavzuni yakunlovchi qisqa xulosa.
+Har bir til uchun:
+- Qiziqarli sarlavha va qisqa tavsif
+- Kamida 350-400 so'zdan iborat to'liq maqola
+- Tegishli auditoriya uchun optimallashtirilgan
 
-Maqola davomida [${keywordsFromTitle.join(', ')}] ro'yxatidagi so'zlarni tabiiy ravishda bir necha marta ishlating. Maqola uchun 5 ta mos teg yarating.
-
----
-**FORMATLASH QOIDALARI (ENG MUHIM):**
-- Javobingda HECH QANDAY Markdown formatlash belgilarini (**, #, *, -) ishlatma.
-- Barcha matn formatlashsiz, toza holatda bo'lishi kerak.
-- Sarlavhalarni ham ** belgisisiz, shunchaki yangi qatordan yoz.
----
+**FORMATLASH QOIDALARI:**
+- Hech qanday Markdown belgilari ishlatma
+- Barcha matn toza formatda bo'lsin
+- Har bir til uchun to'liq alohida kontent yozing
 
 Original matn:
 """
-Sarlavha: ${originalTitle}
-Matn: ${originalContent}
+Title: ${originalTitle}
+Content: ${originalContent}
 """
 
-Kalit so'zlar: ${keywordsFromTitle.join(', ')}
+Category: ${category.name}
+Keywords: ${keywordsFromTitle.join(', ')}
 
-JSON formatida javob bering:
+JSON formatida 3 tilda javob bering:
 {
-  "title": "O'zbek tilidagi sarlavha",
-  "description": "Qisqacha tavsif 1-2 jumla",
-  "content": "To'liq maqola matni o'zbek tilida",
-  "tags": ["teg1", "teg2", "teg3", "teg4", "teg5"],
+  "uz": {
+    "title": "O'zbek tilidagi sarlavha",
+    "description": "Qisqa tavsif o'zbek tilida",
+    "content": "To'liq maqola matni o'zbek tilida"
+  },
+  "ru": {
+    "title": "Заголовок на русском языке",
+    "description": "Краткое описание на русском",
+    "content": "Полная статья на русском языке"
+  },
+  "en": {
+    "title": "Title in English",
+    "description": "Brief description in English",
+    "content": "Full article content in English"
+  },
+  "tags": ["tag1", "tag2", "tag3", "tag4", "tag5"],
   "imageKeywords": ["keyword1", "keyword2", "keyword3", "keyword4", "keyword5"]
 }
-
-VA ENG OXIRIDA, imageKeywords qismida ushbu maqola uchun Unsplash'da rasm qidirishga mos keladigan 5 ta ingliz tilidagi kalit so'zni bering.
-Masalan: ["artificial intelligence", "future technology", "data processing", "neural network", "innovation"]
 `;
 
       const response = await this.ai.models.generateContent({
@@ -76,13 +89,37 @@ Masalan: ["artificial intelligence", "future technology", "data processing", "ne
           responseSchema: {
             type: "object",
             properties: {
-              title: { type: "string" },
-              description: { type: "string" },
-              content: { type: "string" },
+              uz: {
+                type: "object",
+                properties: {
+                  title: { type: "string" },
+                  description: { type: "string" },
+                  content: { type: "string" }
+                },
+                required: ["title", "description", "content"]
+              },
+              ru: {
+                type: "object",
+                properties: {
+                  title: { type: "string" },
+                  description: { type: "string" },
+                  content: { type: "string" }
+                },
+                required: ["title", "description", "content"]
+              },
+              en: {
+                type: "object",
+                properties: {
+                  title: { type: "string" },
+                  description: { type: "string" },
+                  content: { type: "string" }
+                },
+                required: ["title", "description", "content"]
+              },
               tags: { type: "array", items: { type: "string" } },
               imageKeywords: { type: "array", items: { type: "string" } }
             },
-            required: ["title", "description", "content", "tags", "imageKeywords"]
+            required: ["uz", "ru", "en", "tags", "imageKeywords"]
           }
         },
         contents: prompt
@@ -97,16 +134,16 @@ Masalan: ["artificial intelligence", "future technology", "data processing", "ne
       
       // Tags ham bo'lmasa, fallback
       if (!result.tags || result.tags.length === 0) {
-        result.tags = this.generateFallbackTags(result.title, result.content);
+        result.tags = this.generateFallbackTags(result.uz?.title || originalTitle, result.uz?.content || originalContent);
       }
       
-      // Slug yaratish
-      const slug = this.createSlug(result.title);
+      // Slug yaratish (o'zbek tilidagi sarlavhadan)
+      const slug = this.createSlug(result.uz?.title || originalTitle);
 
       return {
-        title: result.title,
-        description: result.description,
-        content: result.content,
+        uz: result.uz,
+        ru: result.ru,
+        en: result.en,
         slug,
         imageKeywords: result.imageKeywords || [],
         tags: result.tags || []

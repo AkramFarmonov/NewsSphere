@@ -1,6 +1,7 @@
 import { parseStringPromise } from 'xml2js';
 import { storage } from '../storage';
 import { aiGenerator } from './ai-generator-improved';
+import type { InsertArticleTranslation } from '@shared/schema';
 import { telegramBot } from './telegram-bot';
 import { unsplashService } from './unsplash';
 import type { InsertArticle } from '@shared/schema';

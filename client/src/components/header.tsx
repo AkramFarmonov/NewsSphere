@@ -5,12 +5,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useCategories, useSearchArticles } from "@/hooks/use-news";
 import { PushNotificationButton } from "@/components/push-notification-button";
+import { LanguageSwitcher } from "@/components/language-switcher";
+import { useTranslation } from 'react-i18next';
 
 export default function Header() {
   const [location] = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const { t } = useTranslation();
 
   const { data: categories = [] } = useCategories();
   const { data: searchResults = [] } = useSearchArticles(searchQuery, 5);
@@ -70,7 +73,7 @@ export default function Header() {
                     <form onSubmit={handleSearchSubmit} className="flex items-center">
                       <Input
                         type="search"
-                        placeholder="Qidirish..."
+                        placeholder={t('nav.search')}
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         className="w-64"
@@ -117,12 +120,8 @@ export default function Header() {
               {/* Push Notifications */}
               <PushNotificationButton />
               
-              {/* Language Selector */}
-              <select className="text-sm border-none bg-transparent cursor-pointer" data-testid="select-language">
-                <option>🇺🇿 O'zbek</option>
-                <option>🇷🇺 Русский</option>
-                <option>🇺🇸 English</option>
-              </select>
+              {/* Language Switcher */}
+              <LanguageSwitcher />
 
               {/* Mobile Search Button */}
               <Button

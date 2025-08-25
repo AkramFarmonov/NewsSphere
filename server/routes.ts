@@ -104,12 +104,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get all articles with pagination
+  // Get all articles with pagination and language support
   app.get("/api/articles", async (req, res) => {
     try {
       const { limit, offset } = paginationSchema.parse(req.query);
+      const lang = (req.query.lang as string) || 'uz'; // Default to Uzbek
+      
       const articles = await storage.getAllArticles(limit, offset);
-      res.json(articles);
+      
+      // Ko'p tilli kontent qo'shish
+      const articlesWithTranslations = await Promise.all(
+        articles.map(async (article) => {
+          const translation = await storage.getArticleTranslation(article.id, lang);
+          if (translation) {
+            return {
+              ...article,
+              title: translation.title,
+              description: translation.description,
+              content: translation.content,
+              language: lang
+            };
+          }
+          return { ...article, language: 'original' };
+        })
+      );
+      
+      res.json(articlesWithTranslations);
     } catch (error) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ error: "Invalid query parameters" });

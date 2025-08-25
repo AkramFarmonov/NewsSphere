@@ -1,4 +1,4 @@
-import { type User, type InsertUser, type Article, type InsertArticle, type Category, type InsertCategory, type RssFeed, type InsertRssFeed, type Newsletter, type InsertNewsletter, type PushSubscription, type InsertPushSubscription, type ArticleWithCategory, type CategoryWithCount, type Story, type InsertStory, type StoryWithCategory, type StoryWithItems, type StoryItem, type InsertStoryItem } from "@shared/schema";
+import { type User, type InsertUser, type Article, type InsertArticle, type Category, type InsertCategory, type RssFeed, type InsertRssFeed, type Newsletter, type InsertNewsletter, type PushSubscription, type InsertPushSubscription, type ArticleWithCategory, type CategoryWithCount, type Story, type InsertStory, type StoryWithCategory, type StoryWithItems, type StoryItem, type InsertStoryItem, type ArticleTranslation, type InsertArticleTranslation } from "@shared/schema";
 import { randomUUID } from "crypto";
 import bcrypt from "bcryptjs";
 
@@ -60,6 +60,13 @@ export interface IStorage {
   updateStoryItem(id: string, data: Partial<InsertStoryItem>): Promise<StoryItem>;
   deleteStoryItem(id: string): Promise<void>;
 
+  // Article Translations methods
+  getArticleTranslations(articleId: string): Promise<ArticleTranslation[]>;
+  getArticleTranslation(articleId: string, languageCode: string): Promise<ArticleTranslation | undefined>;
+  createArticleTranslation(data: InsertArticleTranslation): Promise<ArticleTranslation>;
+  updateArticleTranslation(id: string, data: Partial<InsertArticleTranslation>): Promise<ArticleTranslation>;
+  deleteArticleTranslation(id: string): Promise<void>;
+
   // Admin methods
   updateArticleFeatured(id: string, isFeatured: string): Promise<void>;
   updateArticleBreaking(id: string, isBreaking: string): Promise<void>;
@@ -79,6 +86,7 @@ export class MemStorage implements IStorage {
   private pushSubscriptions: Map<string, PushSubscription>;
   private stories: Map<string, Story>;
   private storyItems: Map<string, StoryItem>;
+  private articleTranslations: Map<string, ArticleTranslation>;
 
   constructor() {
     this.users = new Map();
@@ -89,6 +97,7 @@ export class MemStorage implements IStorage {
     this.pushSubscriptions = new Map();
     this.stories = new Map();
     this.storyItems = new Map();
+    this.articleTranslations = new Map();
     
     // Initialize with default categories
     this.initializeDefaultData();
@@ -703,6 +712,41 @@ export class MemStorage implements IStorage {
 
   async deleteStoryItem(id: string): Promise<void> {
     this.storyItems.delete(id);
+  }
+
+  // Article Translations methods
+  async getArticleTranslations(articleId: string): Promise<ArticleTranslation[]> {
+    return Array.from(this.articleTranslations.values())
+      .filter(translation => translation.articleId === articleId);
+  }
+
+  async getArticleTranslation(articleId: string, languageCode: string): Promise<ArticleTranslation | undefined> {
+    return Array.from(this.articleTranslations.values())
+      .find(translation => translation.articleId === articleId && translation.languageCode === languageCode);
+  }
+
+  async createArticleTranslation(data: InsertArticleTranslation): Promise<ArticleTranslation> {
+    const id = randomUUID();
+    const translation: ArticleTranslation = {
+      id,
+      ...data,
+      createdAt: new Date()
+    };
+    this.articleTranslations.set(id, translation);
+    return translation;
+  }
+
+  async updateArticleTranslation(id: string, data: Partial<InsertArticleTranslation>): Promise<ArticleTranslation> {
+    const translation = this.articleTranslations.get(id);
+    if (!translation) throw new Error("Article translation not found");
+
+    const updatedTranslation = { ...translation, ...data };
+    this.articleTranslations.set(id, updatedTranslation);
+    return updatedTranslation;
+  }
+
+  async deleteArticleTranslation(id: string): Promise<void> {
+    this.articleTranslations.delete(id);
   }
 
   // Article admin methods

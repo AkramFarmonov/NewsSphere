@@ -20,10 +20,7 @@ export const categories = pgTable("categories", {
 
 export const articles = pgTable("articles", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  title: text("title").notNull(),
   slug: text("slug").notNull().unique(),
-  description: text("description"),
-  content: text("content"),
   imageUrl: text("image_url"),
   imageAttribution: text("image_attribution"), // "Photo by John Doe on Unsplash"
   imageAuthor: text("image_author"), // "John Doe"
@@ -38,6 +35,20 @@ export const articles = pgTable("articles", {
   isBreaking: text("is_breaking").default("false").notNull(),
   isFeatured: text("is_featured").default("false").notNull(),
 });
+
+// Yangi article_translations jadvali
+export const articleTranslations = pgTable("article_translations", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  articleId: varchar("article_id").references(() => articles.id, { onDelete: "cascade" }).notNull(),
+  languageCode: varchar("language_code", { length: 5 }).notNull(), // 'uz', 'ru', 'en'
+  title: text("title").notNull(),
+  description: text("description"),
+  content: text("content").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (table) => ({
+  // Har bir maqola uchun faqat bitta tilda tarjima bo'lishi uchun
+  uniqueArticleLanguage: sql`UNIQUE (${table.articleId}, ${table.languageCode})`
+}));
 
 export const rssFeeds = pgTable("rss_feeds", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -110,6 +121,11 @@ export const insertArticleSchema = createInsertSchema(articles).omit({
   likes: true,
 });
 
+export const insertArticleTranslationSchema = createInsertSchema(articleTranslations).omit({
+  id: true,
+  createdAt: true,
+});
+
 export const insertRssFeedSchema = createInsertSchema(rssFeeds).omit({
   id: true,
   createdAt: true,
@@ -146,6 +162,9 @@ export type InsertCategory = z.infer<typeof insertCategorySchema>;
 export type Article = typeof articles.$inferSelect;
 export type InsertArticle = z.infer<typeof insertArticleSchema>;
 
+export type ArticleTranslation = typeof articleTranslations.$inferSelect;
+export type InsertArticleTranslation = z.infer<typeof insertArticleTranslationSchema>;
+
 export type RssFeed = typeof rssFeeds.$inferSelect;
 export type InsertRssFeed = z.infer<typeof insertRssFeedSchema>;
 
@@ -164,6 +183,12 @@ export type InsertStoryItem = z.infer<typeof insertStoryItemSchema>;
 // Extended types for API responses
 export type ArticleWithCategory = Article & {
   category: Category;
+  translations?: ArticleTranslation[];
+};
+
+export type ArticleWithTranslations = Article & {
+  category: Category;
+  translations: ArticleTranslation[];
 };
 
 export type CategoryWithCount = Category & {
