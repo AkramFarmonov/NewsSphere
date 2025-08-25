@@ -35,20 +35,21 @@ export default function HeroSection() {
   }
 
   return (
-    <section className="mb-12" data-testid="hero-section">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+    <section className="mb-8 sm:mb-12" data-testid="hero-section">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
         {/* Featured Article */}
-        <article className="md:col-span-1 bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-shadow" data-testid="featured-article">
+        <article className="lg:col-span-1 bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-shadow" data-testid="featured-article">
           <Link href={`/article/${featuredArticle.slug}`}>
             {featuredArticle.imageUrl && (
               <img 
                 src={featuredArticle.imageUrl} 
                 alt={featuredArticle.title}
-                className="w-full h-64 object-cover"
+                className="w-full h-48 sm:h-56 lg:h-64 object-cover"
+                loading="lazy"
                 data-testid="featured-article-image"
               />
             )}
-            <div className="p-6">
+            <div className="p-4 sm:p-6">
               <div className="flex items-center mb-3">
                 <span 
                   className="px-3 py-1 rounded-full text-xs font-medium text-white"
@@ -61,13 +62,13 @@ export default function HeroSection() {
                   {new Date(featuredArticle.publishedAt).toLocaleDateString("uz-UZ")}
                 </span>
               </div>
-              <h2 className="text-2xl font-bold mb-3 hover:text-accent cursor-pointer transition-colors" data-testid="featured-article-title">
+              <h2 className="text-xl sm:text-2xl font-bold mb-2 sm:mb-3 hover:text-accent cursor-pointer transition-colors leading-tight" data-testid="featured-article-title">
                 {featuredArticle.title}
               </h2>
               {featuredArticle.description && (
-                <p className="text-gray-600 mb-4" data-testid="featured-article-description">
-                  {featuredArticle.description.length > 200 
-                    ? `${featuredArticle.description.substring(0, 200)}...`
+                <p className="text-sm sm:text-base text-gray-600 mb-3 sm:mb-4 leading-relaxed" data-testid="featured-article-description">
+                  {featuredArticle.description.length > 150 
+                    ? `${featuredArticle.description.substring(0, 150)}...`
                     : featuredArticle.description
                   }
                 </p>
@@ -90,7 +91,7 @@ export default function HeroSection() {
         </article>
 
         {/* Secondary Articles */}
-        <div className="space-y-6" data-testid="secondary-articles">
+        <div className="space-y-4 sm:space-y-6" data-testid="secondary-articles">
           {secondaryArticles.map((article) => (
             <NewsCard
               key={article.id}

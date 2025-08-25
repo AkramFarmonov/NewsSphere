@@ -140,7 +140,7 @@ export default function ArticlePage() {
 
   return (
     <div data-testid="article-page">
-      <main className="container mx-auto px-4 max-w-7xl py-8">
+      <main className="container mx-auto px-4 sm:px-6 max-w-7xl py-6 sm:py-8">
         
         {/* Breadcrumb */}
         <nav className="flex items-center space-x-2 text-sm text-gray-500 mb-8" data-testid="breadcrumb">
@@ -173,17 +173,17 @@ export default function ArticlePage() {
                 </span>
               </div>
               
-              <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-6" data-testid="article-title">
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-4 sm:mb-6 leading-tight" data-testid="article-title">
                 {article.title}
               </h1>
 
               {article.description && (
-                <p className="text-xl text-gray-600 mb-6 leading-relaxed" data-testid="article-description">
+                <p className="text-lg sm:text-xl text-gray-600 mb-4 sm:mb-6 leading-relaxed" data-testid="article-description">
                   {article.description}
                 </p>
               )}
 
-              <div className="flex flex-wrap items-center gap-6 text-sm text-gray-500 mb-6" data-testid="article-meta">
+              <div className="flex flex-wrap items-center gap-3 sm:gap-6 text-sm text-gray-500 mb-4 sm:mb-6" data-testid="article-meta">
                 <div className="flex items-center">
                   <User className="w-4 h-4 mr-2" />
                   <span data-testid="article-source">{article.sourceName}</span>
@@ -211,13 +211,13 @@ export default function ArticlePage() {
               </div>
 
               {/* Social Actions */}
-              <div className="flex items-center space-x-4 pb-6 border-b border-gray-200" data-testid="article-actions">
+              <div className="flex flex-wrap items-center gap-3 sm:gap-4 pb-4 sm:pb-6 border-b border-gray-200" data-testid="article-actions">
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={handleLike}
                   disabled={likeMutation.isPending}
-                  className={`${isLiked ? 'text-red-500 border-red-200 bg-red-50' : ''}`}
+                  className={`min-h-[44px] px-4 py-2 ${isLiked ? 'text-red-500 border-red-200 bg-red-50' : ''}`}
                   data-testid="button-like-article"
                 >
                   <Heart className={`w-4 h-4 mr-2 ${isLiked ? 'fill-current' : ''}`} />
@@ -227,6 +227,7 @@ export default function ArticlePage() {
                   variant="outline"
                   size="sm"
                   onClick={handleShare}
+                  className="min-h-[44px] px-4 py-2"
                   data-testid="button-share-article"
                 >
                   <Share2 className="w-4 h-4 mr-2" />
@@ -237,7 +238,7 @@ export default function ArticlePage() {
 
             {/* Featured Image */}
             {article.imageUrl && (
-              <div className="mb-8" data-testid="article-image">
+              <div className="mb-6 sm:mb-8" data-testid="article-image">
                 <img 
                   src={article.imageUrl} 
                   alt={article.title}
@@ -249,7 +250,7 @@ export default function ArticlePage() {
             {/* Article Body */}
             <div className="prose max-w-none" data-testid="article-body">
               {article.content ? (
-                <div className="whitespace-pre-wrap text-gray-800 leading-relaxed text-lg">
+                <div className="whitespace-pre-wrap text-gray-800 leading-relaxed text-base sm:text-lg">
                   {article.content}
                 </div>
               ) : (
@@ -275,7 +276,7 @@ export default function ArticlePage() {
             {filteredRelatedArticles.length > 0 && (
               <section className="mt-12 pt-8 border-t border-gray-200" data-testid="related-articles">
                 <h2 className="text-2xl font-bold text-gray-900 mb-6">Shunga o'xshash maqolalar</h2>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
                   {filteredRelatedArticles.map((relatedArticle) => (
                     <NewsCard
                       key={relatedArticle.id}

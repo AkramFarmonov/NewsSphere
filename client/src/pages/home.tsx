@@ -17,7 +17,7 @@ export default function Home() {
     <div data-testid="home-page">
       <BreakingNews />
       
-      <main className="container mx-auto px-4 max-w-7xl py-8">
+      <main className="container mx-auto px-4 sm:px-6 max-w-7xl py-6 sm:py-8">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           
           {/* Main Content Area */}
@@ -31,7 +31,7 @@ export default function Home() {
                 {[1, 2, 3].map((i) => (
                   <div key={i} className="animate-pulse">
                     <div className="h-8 bg-gray-200 rounded w-64 mb-6"></div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
                       {[1, 2, 3].map((j) => (
                         <div key={j} className="bg-gray-200 rounded-xl h-80"></div>
                       ))}

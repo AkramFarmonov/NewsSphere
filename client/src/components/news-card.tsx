@@ -124,11 +124,12 @@ export default function NewsCard({
           <img 
             src={article.imageUrl} 
             alt={article.title}
-            className="w-full h-48 object-cover"
+            className="w-full h-48 sm:h-52 md:h-48 object-cover"
             data-testid={`news-image-${article.id}`}
+            loading="lazy"
           />
         )}
-        <div className="p-4">
+        <div className="p-4 sm:p-5">
           {showCategory && (
             <div className="flex items-center mb-2">
               <span 
@@ -144,13 +145,13 @@ export default function NewsCard({
               </span>
             </div>
           )}
-          <h3 className="font-semibold mb-2 hover:text-accent cursor-pointer transition-colors" data-testid={`news-title-${article.id}`}>
+          <h3 className="font-semibold text-base sm:text-lg mb-2 hover:text-accent cursor-pointer transition-colors leading-tight" data-testid={`news-title-${article.id}`}>
             {article.title}
           </h3>
           {article.description && (
-            <p className="text-sm text-gray-600 mb-3" data-testid={`news-description-${article.id}`}>
-              {article.description.length > 150 
-                ? `${article.description.substring(0, 150)}...`
+            <p className="text-sm sm:text-base text-gray-600 mb-3 leading-relaxed" data-testid={`news-description-${article.id}`}>
+              {article.description.length > 120 
+                ? `${article.description.substring(0, 120)}...`
                 : article.description
               }
             </p>
@@ -172,19 +173,19 @@ export default function NewsCard({
                   size="sm"
                   onClick={handleLike}
                   disabled={likeMutation.isPending}
-                  className={`text-sm h-auto p-1 ${isLiked ? 'text-red-500' : 'text-gray-400 hover:text-red-500'}`}
+                  className={`text-sm h-auto p-2 min-h-[40px] ${isLiked ? 'text-red-500' : 'text-gray-400 hover:text-red-500'}`}
                   data-testid={`button-like-${article.id}`}
                 >
-                  <Heart className={`w-3 h-3 mr-1 ${isLiked ? 'fill-current' : ''}`} />
+                  <Heart className={`w-4 h-4 mr-1 ${isLiked ? 'fill-current' : ''}`} />
                   {localLikes}
                 </Button>
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="text-gray-400 hover:text-accent text-sm h-auto p-1"
+                  className="text-gray-400 hover:text-accent text-sm h-auto p-2 min-h-[40px]"
                   data-testid={`button-share-${article.id}`}
                 >
-                  <Share2 className="w-3 h-3" />
+                  <Share2 className="w-4 h-4" />
                 </Button>
               </div>
             </div>

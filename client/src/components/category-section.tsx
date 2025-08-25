@@ -35,15 +35,15 @@ export default function CategorySection({ category, limit = 3 }: CategorySection
   }
 
   return (
-    <section className="mb-12" data-testid={`category-section-${category.slug}`}>
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold text-primary flex items-center" data-testid={`category-title-${category.slug}`}>
+    <section className="mb-8 sm:mb-12" data-testid={`category-section-${category.slug}`}>
+      <div className="flex items-center justify-between mb-4 sm:mb-6">
+        <h2 className="text-xl sm:text-2xl font-bold text-primary flex items-center" data-testid={`category-title-${category.slug}`}>
           <i className={`${category.icon} mr-3`} style={{ color: category.color }}></i>
           {category.name}
         </h2>
         <Link 
           href={`/category/${category.slug}`} 
-          className="text-accent hover:text-primary transition-colors font-medium flex items-center"
+          className="text-accent hover:text-primary transition-colors font-medium flex items-center text-sm sm:text-base min-h-[44px] px-2"
           data-testid={`category-view-all-${category.slug}`}
         >
           Barchasini ko'rish 
@@ -51,7 +51,7 @@ export default function CategorySection({ category, limit = 3 }: CategorySection
         </Link>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
         {articles.map((article) => (
           <NewsCard
             key={article.id}
