@@ -75,12 +75,15 @@ export default function Header() {
         <nav className="py-4">
           <div className="flex items-center justify-between">
             {/* Logo */}
-            <Link href="/" className="flex items-center" data-testid="link-logo">
+            <Link href="/" className="flex items-center space-x-3" data-testid="link-logo">
               <img 
                 src="/logo.png" 
                 alt="RealNews" 
                 className="h-10 w-auto"
               />
+              <div className="text-2xl font-bold text-primary">
+                RealNews
+              </div>
             </Link>
 
             {/* Desktop Navigation */}
