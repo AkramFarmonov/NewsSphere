@@ -1,0 +1,52 @@
+1-Vazifa: Maqola Matnini Yaxshilash va SEO'ga Moslashtirish
+Muammo: Hozirda AI'ga berilayotgan buyruq, ehtimol, "Ushbu matnni o'zbek tiliga tarjima qil" kabi oddiy. Natijada, AI faqat qisqa va "quruq" tarjima qilyapti.
+
+Yechim: AI uchun "Rol O'ynash" Promtini Yaratish
+
+Biz AI'ga shunchaki tarjimon emas, balki professional o'zbek jurnalisti va SEO mutaxassisi rolini berishimiz kerak. Dasturchi backend'dagi Gemini API'ga yuborilayotgan promtni quyidagi yangi, kuchaytirilgan andoza bilan almashtirishi kerak:
+
+Yangi Promt Andoza:
+
+Sen yuqori malakali o'zbek jurnalisti va SEO-mutaxassisasan. Sening vazifang - quyida berilgan ingliz tilidagi matndan foydalanib, O'zbekiston auditoriyasi uchun qiziqarli, o'qishli va SEO'ga optimallashtirilgan, kamida 350-400 so'zdan iborat to'liq maqola yozish.
+
+Maqolaning strukturasi quyidagicha bo'lishi shart:
+1.  **Qiziqarli Kirish Qismi:** O'quvchini jalb qiladigan kirish.
+2.  **Asosiy Qism:** Mavzuni to'liq yoritib beruvchi, kamida 2-3 ta sarlavhali (sub-heading) bo'limlar.
+3.  **Xulosa:** Mavzuni yakunlovchi qisqa xulosa.
+
+Maqola davomida [kalit_so'zlar] ro'yxatidagi so'zlarni tabiiy ravishda bir necha marta ishlating. Maqola uchun 5 ta mos teg (tag) yarating.
+
+Original matn:
+"""
+[INGLIZ TILIDAGI MAQOLA MATNI SHU YERGA QO'YILADI]
+"""
+
+Kalit so'zlar: [MAQOLA SARLAVHASIDAN OLINGAN KALIT SO'ZLAR]
+Bu qanday ishlaydi: Bu promt AI'ni shunchaki tarjima qilishdan ko'ra, mavzuni tushunib, uni kengaytirib, to'liqqonli, strukturali va SEO'ga mos maqola yozishga majbur qiladi.
+
+2-Vazifa: Rasmlarni Mavzuga Aniq Moslashtirish
+Muammo: Hozirda Unsplash API'ga rasm qidirish uchun, ehtimol, faqat maqolaning sarlavhasi yuborilmoqda. Sarlavhalar ba'zan mavhum bo'lgani uchun (masalan, "kelajakda rivojlanadi"), Unsplash umumiy, abstrakt rasmlarni qaytarmoqda.
+
+Yechim: Rasm Qidirish Kalit So'zlarini ham AI'dan Olish
+
+Bu juda samarali usul. Biz yuqoridagi yangilangan promtimizdan rasm qidirish uchun ham foydalanamiz.
+
+Yangi Reja:
+
+Promtni Yangilash (Dasturchi uchun): Yuqoridagi promtning eng oxiriga quyidagi qatorni qo'shish kerak:
+
+...
+Maqola uchun 5 ta mos teg (tag) yarating.
+
+VA ENG OXIRIDA, USHBU MAQOLA UCHUN UNSPLASH'DA RASM QIDIRISHGA MOS KELADIGAN 5 TA INGLIZ TILIDAGI KALIT SO'ZNI VERGUL BILAN AJRATIB YOZIB BER.
+Masalan: artificial intelligence, future technology, data processing, neural network, innovation
+Backend Mantig'ini O'zgartirish (Dasturchi uchun):
+
+Dasturchi endi Unsplash API'ga rasm qidirish uchun maqola sarlavhasini emas, balki Gemini'dan kelgan javobning eng oxiridagi ingliz tilidagi 5 ta kalit so'zni yuborishi kerak.
+
+Bu qanday ishlaydi: AI maqolaning mazmunini chuqur tushunib, unga eng mos keladigan aniq kalit so'zlarni (masalan, "sportchi startda", "yugurish yo'lakchasi", "olimpiada") generatsiya qilib beradi. Natijada, Unsplash'dan olingan rasmlar ancha aniq va mavzuga mos bo'ladi.
+
+Xulosa
+Bu ikki vazifa bir-biriga bog'liq va ularni birgalikda bajarish mumkin. Ular yakunlangach, saytingizdagi kontentning sifati keskin oshadi.
+
+Keyingi qadam sifatida aynan shu AI promtlarini takomillashtirish vazifasini belgilashga nima deysiz?

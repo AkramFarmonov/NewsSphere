@@ -91,7 +91,36 @@ export class UnsplashService {
   }
 
   /**
-   * Get image with attribution for an article based on its title and category
+   * Get image with attribution using AI-generated keywords (IMPROVED)
+   */
+  async getArticleImageWithKeywords(aiKeywords: string[]): Promise<UnsplashImageData | null> {
+    if (!aiKeywords || aiKeywords.length === 0) {
+      return null;
+    }
+
+    // Try each AI-generated keyword
+    for (const keyword of aiKeywords) {
+      const photos = await this.searchPhotos(keyword, 5);
+      if (photos.length > 0) {
+        const randomIndex = Math.floor(Math.random() * photos.length);
+        const photo = photos[randomIndex];
+        
+        await this.triggerDownload(photo.links.download_location);
+        
+        return {
+          imageUrl: photo.urls.regular,
+          attribution: `Photo by ${photo.user.name} on Unsplash`,
+          author: photo.user.name,
+          authorUrl: photo.user.links.html
+        };
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * Get image with attribution for an article based on its title and category (FALLBACK)
    */
   async getArticleImage(title: string, category: string): Promise<UnsplashImageData | null> {
     // Extract specific keywords from title

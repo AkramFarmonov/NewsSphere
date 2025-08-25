@@ -554,7 +554,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "Category not found" });
       }
 
-      const { aiGenerator } = await import("./services/ai-generator");
+      const { aiGenerator } = await import("./services/ai-generator-improved");
       if (!aiGenerator) {
         return res.status(500).json({ error: "AI Generator not available" });
       }
@@ -672,7 +672,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "Article not found" });
       }
 
-      const { aiGenerator } = await import("./services/ai-generator");
+      const { aiGenerator } = await import("./services/ai-generator-improved");
       const improved = await aiGenerator?.improveExistingArticle(article);
       
       res.json(improved);
@@ -695,7 +695,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "Category not found" });
       }
 
-      const { aiGenerator } = await import("./services/ai-generator");
+      const { aiGenerator } = await import("./services/ai-generator-improved");
       const generated = await aiGenerator?.generateOriginalArticle(category);
       
       res.json(generated);

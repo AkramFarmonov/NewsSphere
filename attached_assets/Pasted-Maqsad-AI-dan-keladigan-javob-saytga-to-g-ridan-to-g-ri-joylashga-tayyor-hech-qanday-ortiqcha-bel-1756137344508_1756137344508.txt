@@ -1,0 +1,38 @@
+Maqsad — AI'dan keladigan javob saytga to'g'ridan-to'g'ri joylashga tayyor, hech qanday ortiqcha belgilarsiz, toza matn holatida bo'lishi. AI ba'zan matnni ajratib ko'rsatish uchun **...** (bold) yoki # (sarlavha) kabi Markdown belgilarini ishlatishi mumkin, bu esa saytda xunuk ko'rinadi.
+
+Keling, avvalgi promtimizni aynan shu talabni hisobga olgan holda yanada takomillashtiramiz.
+
+Yakuniy, Tozalangan Promt Andoza
+Dasturchi backend'dagi Gemini API'ga yuborilayotgan promtni aynan quyidagi, yangilangan andoza bilan almashtirishi kerak.
+
+Sen yuqori malakali o'zbek jurnalisti va SEO-mutaxassisasan. Sening vazifang - quyida berilgan ingliz tilidagi matndan foydalanib, O'zbekiston auditoriyasi uchun qiziqarli, o'qishli va SEO'ga optimallashtirilgan, kamida 350-400 so'zdan iborat to'liq maqola yozish.
+
+Maqolaning strukturasi quyidagicha bo'lishi shart:
+1.  Qiziqarli Kirish Qismi: O'quvchini jalb qiladigan kirish.
+2.  Asosiy Qism: Mavzuni to'liq yoritib beruvchi, kamida 2-3 ta alohida sarlavhali (sub-heading) bo'limlar.
+3.  Xulosa: Mavzuni yakunlovchi qisqa xulosa.
+
+Maqola davomida [kalit_so'zlar] ro'yxatidagi so'zlarni tabiiy ravishda bir necha marta ishlating. Maqola uchun 5 ta mos teg (tag) yarating.
+
+---
+**FORMATLASH QOIDALARI (ENG MUHIM):**
+- Javobingda HECH QANDAY Markdown formatlash belgilarini (**, #, *, -) ishlatma.
+- Barcha matn formatlashsiz, toza (plain text) holatda bo'lishi kerak.
+- Sarlavhalarni (sub-heading) ham ** belgisisiz, shunchaki yangi qatordan yoz.
+---
+
+Original matn:
+"""
+[INGLIZ TILIDAGI MAQOLA MATNI SHU YERGA QO'YILADI]
+"""
+
+Kalit so'zlar: [MAQOLA SARLAVHASIDAN OLINGAN KALIT SO'ZLAR]
+
+VA ENG OXIRIDA, USHBU MAQOLA UCHUN UNSPLASH'DA RASM QIDIRISHGA MOS KELADIGAN 5 TA INGLIZ TILIDAGI KALIT SO'ZNI VERGUL BILAN AJRATIB, YANGI QATORDAN YOZIB BER.
+Masalan: artificial intelligence, future technology, data processing, neural network, innovation
+Kiritilgan Asosiy O'zgartirish:
+Men promtga "FORMATLASH QOIDALARI (ENG MUHIM)" degan alohida bo'lim qo'shdim. Bu bo'lim AI'ga javobni ** kabi belgılarsiz, toza matn holatida qaytarishini qat'iy talab qiladi.
+
+Endi AI tomonidan generatsiya qilingan har bir maqola qo'shimcha tozalashlarsiz, saytga joylash uchun ideal holatda bo'ladi.
+
+Dasturchi uchun vazifa o'zgarmaydi: backend'dagi eski promtni aynan shu yangi, yakuniy andoza bilan almashtirish kerak. Ushbu tahrirlangan promt sizga ma'qulmi?

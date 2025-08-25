@@ -1,6 +1,6 @@
 import { parseStringPromise } from 'xml2js';
 import { storage } from '../storage';
-import { aiGenerator } from './ai-generator';
+import { aiGenerator } from './ai-generator-improved';
 import { telegramBot } from './telegram-bot';
 import { unsplashService } from './unsplash';
 import type { InsertArticle } from '@shared/schema';
@@ -156,6 +156,7 @@ export class RssParser {
           description,
           content
         };
+        let aiImageKeywords: string[] = [];
 
         try {
           if (process.env.GEMINI_API_KEY && content && aiGenerator) {
@@ -172,6 +173,18 @@ export class RssParser {
                 description: enhanced.description,
                 content: enhanced.content
               };
+              aiImageKeywords = enhanced.imageKeywords || [];
+              
+              // Agar rasm hali topilmagan bo'lsa va AI keywords bor bo'lsa, ulardan foydalanish
+              if (!imageUrl && aiImageKeywords.length > 0) {
+                const unsplashData = await unsplashService.getArticleImageWithKeywords(aiImageKeywords);
+                if (unsplashData) {
+                  imageUrl = unsplashData.imageUrl;
+                  imageAttribution = unsplashData.attribution;
+                  imageAuthor = unsplashData.author;
+                  imageAuthorUrl = unsplashData.authorUrl;
+                }
+              }
             }
           }
         } catch (error) {

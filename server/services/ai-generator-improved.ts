@@ -1,7 +1,7 @@
 import { GoogleGenAI } from "@google/genai";
 import type { Article, Category } from "@shared/schema";
 
-// AI orqali yangilik generatsiyasi uchun xizmat
+// AI orqali yangilik generatsiyasi uchun yaxshilangan xizmat
 export class AINewsGenerator {
   private ai: GoogleGenAI;
 
@@ -17,12 +17,12 @@ export class AINewsGenerator {
     return !!process.env.GEMINI_API_KEY && !!this.ai;
   }
 
-  // RSS maqolasini o'zbek tiliga tarjima qilish va qayta yozish
+  // RSS maqolasini o'zbek tiliga tarjima qilish va qayta yozish (YAXSHILANGAN)
   async translateAndRewriteArticle(
     originalTitle: string,
     originalContent: string,
     category: Category
-  ): Promise<{ title: string; description: string; content: string; slug: string; imageKeywords: string[] }> {
+  ): Promise<{ title: string; description: string; content: string; slug: string; imageKeywords: string[]; tags: string[] }> {
     if (!this.checkApiKey()) {
       throw new Error("Gemini API key not configured");
     }
@@ -56,8 +56,17 @@ Matn: ${originalContent}
 
 Kalit so'zlar: ${keywordsFromTitle.join(', ')}
 
-VA ENG OXIRIDA, USHBU MAQOLA UCHUN UNSPLASH'DA RASM QIDIRISHGA MOS KELADIGAN 5 TA INGLIZ TILIDAGI KALIT SO'ZNI VERGUL BILAN AJRATIB, YANGI QATORDAN YOZIB BER.
-Masalan: artificial intelligence, future technology, data processing, neural network, innovation
+JSON formatida javob bering:
+{
+  "title": "O'zbek tilidagi sarlavha",
+  "description": "Qisqacha tavsif 1-2 jumla",
+  "content": "To'liq maqola matni o'zbek tilida",
+  "tags": ["teg1", "teg2", "teg3", "teg4", "teg5"],
+  "imageKeywords": ["keyword1", "keyword2", "keyword3", "keyword4", "keyword5"]
+}
+
+VA ENG OXIRIDA, imageKeywords qismida ushbu maqola uchun Unsplash'da rasm qidirishga mos keladigan 5 ta ingliz tilidagi kalit so'zni bering.
+Masalan: ["artificial intelligence", "future technology", "data processing", "neural network", "innovation"]
 `;
 
       const response = await this.ai.models.generateContent({
@@ -69,15 +78,27 @@ Masalan: artificial intelligence, future technology, data processing, neural net
             properties: {
               title: { type: "string" },
               description: { type: "string" },
-              content: { type: "string" }
+              content: { type: "string" },
+              tags: { type: "array", items: { type: "string" } },
+              imageKeywords: { type: "array", items: { type: "string" } }
             },
-            required: ["title", "description", "content"]
+            required: ["title", "description", "content", "tags", "imageKeywords"]
           }
         },
         contents: prompt
       });
 
-      const result = JSON.parse(response.text || "{}");
+      let result = JSON.parse(response.text || "{}");
+      
+      // Agar imageKeywords AI tomonidan berilmagan bo'lsa, fallback method
+      if (!result.imageKeywords || result.imageKeywords.length === 0) {
+        result.imageKeywords = this.extractImageKeywordsFromText(originalTitle, originalContent, category);
+      }
+      
+      // Tags ham bo'lmasa, fallback
+      if (!result.tags || result.tags.length === 0) {
+        result.tags = this.generateFallbackTags(result.title, result.content);
+      }
       
       // Slug yaratish
       const slug = this.createSlug(result.title);
@@ -86,7 +107,9 @@ Masalan: artificial intelligence, future technology, data processing, neural net
         title: result.title,
         description: result.description,
         content: result.content,
-        slug
+        slug,
+        imageKeywords: result.imageKeywords || [],
+        tags: result.tags || []
       };
     } catch (error) {
       console.error("AI yangilik generatsiyasida xatolik:", error);
@@ -265,6 +288,71 @@ JSON array formatida javob bering: ["teg1", "teg2", "teg3", ...]
       console.error("Teglar yaratishda xatolik:", error);
       return [];
     }
+  }
+
+  // YAXSHILANGAN: Matndan kalit so'zlar ajratib olish
+  private extractKeywordsFromText(text: string): string[] {
+    // O'zbek tilida muhim so'zlarni ajratib olish
+    const commonWords = ["va", "uchun", "bilan", "da", "ga", "ni", "ning", "dan", "bo'yicha", "haqida", "yilda", "yangi", "katta", "the", "a", "an", "and", "or", "but", "in", "on", "at", "to", "for", "of", "with", "by"];
+    
+    const words = text.toLowerCase()
+      .replace(/[^\w\s]/g, ' ')
+      .split(/\s+/)
+      .filter(word => word.length > 3)
+      .filter(word => !commonWords.includes(word))
+      .slice(0, 5);
+
+    return words;
+  }
+
+  // Rasm qidirish uchun kalit so'zlar generatsiya qilish (FALLBACK)
+  private extractImageKeywordsFromText(title: string, content: string, category: Category): string[] {
+    // Translation mapping for better English search results
+    const translations: Record<string, string> = {
+      "texnologiya": "technology",
+      "sun'iy": "artificial",
+      "intellekt": "intelligence",
+      "sport": "sports",
+      "chempionat": "championship",
+      "o'zbek": "uzbek",
+      "jahon": "world",
+      "iqtisodiyot": "economy",
+      "madaniyat": "culture",
+      "festival": "festival",
+      "park": "building",
+      "siyosat": "politics",
+      "o'zbekiston": "uzbekistan"
+    };
+
+    const titleWords = this.extractKeywordsFromText(title);
+    const categoryWords = this.extractKeywordsFromText(category.name);
+    
+    const allWords = [...titleWords, ...categoryWords]
+      .map(word => translations[word] || word)
+      .slice(0, 5);
+
+    // Kategoriya bo'yicha default keywords
+    const categoryDefaults: Record<string, string[]> = {
+      "Texnologiya": ["technology", "innovation", "digital", "computer", "artificial intelligence"],
+      "Sport": ["sports", "athlete", "competition", "training", "stadium"],
+      "Iqtisodiyot": ["business", "economy", "finance", "market", "investment"],
+      "Madaniyat": ["culture", "traditional", "art", "festival", "heritage"],
+      "O'zbekiston": ["uzbekistan", "tashkent", "building", "development", "architecture"],
+      "Dunyo": ["world", "global", "international", "news", "countries"],
+      "Siyosat": ["politics", "government", "leadership", "meeting", "policy"]
+    };
+
+    const defaults = categoryDefaults[category.name] || ["news", "information", "article", "story", "update"];
+    
+    return allWords.length > 0 ? allWords : defaults;
+  }
+
+  // Fallback tags generatsiya qilish
+  private generateFallbackTags(title: string, content: string): string[] {
+    const keywords = this.extractKeywordsFromText(`${title} ${content}`);
+    const baseTags = ["yangilik", "ma'lumot", "dolzarb"];
+    
+    return [...keywords.slice(0, 3), ...baseTags].slice(0, 5);
   }
 }
 
