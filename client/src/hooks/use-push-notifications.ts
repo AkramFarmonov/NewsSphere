@@ -106,7 +106,7 @@ export function usePushNotifications() {
       });
 
       // Obunani serverga yuborish
-      await apiRequest('/api/push/subscribe', 'POST', {
+      await apiRequest('POST', '/api/push/subscribe', {
         endpoint: subscription.endpoint,
         keys: {
           p256dh: arrayBufferToBase64(subscription.getKey('p256dh')),
