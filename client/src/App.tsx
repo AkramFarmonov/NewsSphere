@@ -11,6 +11,7 @@ import ArticlePage from "@/pages/article";
 import AdminPage from "@/pages/admin";
 import LoginPage from "@/pages/login";
 import RegisterPage from "@/pages/register";
+import StoriesPage from "@/pages/stories";
 import NotFound from "@/pages/not-found";
 import SearchResults from "@/pages/search-results";
 
@@ -20,6 +21,7 @@ function Router() {
       <Route path="/" component={Home} />
       <Route path="/category/:slug" component={CategoryPage} />
       <Route path="/article/:slug" component={ArticlePage} />
+      <Route path="/stories" component={StoriesPage} />
       <Route path="/admin" component={AdminPage} />
       <Route path="/login" component={LoginPage} />
       <Route path="/register" component={RegisterPage} />

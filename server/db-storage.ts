@@ -2,14 +2,17 @@ import { drizzle } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
 import { eq, desc, asc, like, and, or, sql } from 'drizzle-orm';
 import { 
-  users, categories, articles, rssFeeds, newsletters, pushSubscriptions,
+  users, categories, articles, rssFeeds, newsletters, pushSubscriptions, stories, storyItems,
   type User, type InsertUser, 
   type Article, type InsertArticle, 
   type Category, type InsertCategory, 
   type RssFeed, type InsertRssFeed, 
   type Newsletter, type InsertNewsletter,
   type PushSubscription, type InsertPushSubscription,
-  type ArticleWithCategory, type CategoryWithCount 
+  type Story, type InsertStory,
+  type StoryItem, type InsertStoryItem,
+  type ArticleWithCategory, type CategoryWithCount,
+  type StoryWithItems, type StoryWithCategory
 } from "@shared/schema";
 import type { IStorage } from "./storage";
 
@@ -401,5 +404,136 @@ export class DbStorage implements IStorage {
     await this.db
       .delete(pushSubscriptions)
       .where(eq(pushSubscriptions.endpoint, endpoint));
+  }
+
+  // Stories methods
+  async getAllStories(): Promise<StoryWithCategory[]> {
+    const result = await this.db
+      .select({
+        story: stories,
+        category: categories,
+        itemCount: sql<number>`cast(count(${storyItems.id}) as int)`
+      })
+      .from(stories)
+      .leftJoin(categories, eq(stories.categoryId, categories.id))
+      .leftJoin(storyItems, eq(stories.id, storyItems.storyId))
+      .groupBy(stories.id, categories.id)
+      .orderBy(desc(stories.createdAt));
+
+    return result.map(row => ({
+      ...row.story,
+      category: row.category,
+      itemCount: row.itemCount || 0
+    }));
+  }
+
+  async getActiveStories(): Promise<StoryWithCategory[]> {
+    const result = await this.db
+      .select({
+        story: stories,
+        category: categories,
+        itemCount: sql<number>`cast(count(${storyItems.id}) as int)`
+      })
+      .from(stories)
+      .leftJoin(categories, eq(stories.categoryId, categories.id))
+      .leftJoin(storyItems, eq(stories.id, storyItems.storyId))
+      .where(
+        and(
+          eq(stories.isActive, "true"),
+          or(
+            sql`${stories.expiresAt} IS NULL`,
+            sql`${stories.expiresAt} > NOW()`
+          )
+        )
+      )
+      .groupBy(stories.id, categories.id)
+      .orderBy(asc(stories.order), desc(stories.createdAt));
+
+    return result.map(row => ({
+      ...row.story,
+      category: row.category,
+      itemCount: row.itemCount || 0
+    }));
+  }
+
+  async getStoryById(id: string): Promise<StoryWithItems | undefined> {
+    const storyResult = await this.db
+      .select({
+        story: stories,
+        category: categories
+      })
+      .from(stories)
+      .leftJoin(categories, eq(stories.categoryId, categories.id))
+      .where(eq(stories.id, id));
+
+    if (!storyResult[0]) return undefined;
+
+    const items = await this.db
+      .select()
+      .from(storyItems)
+      .where(eq(storyItems.storyId, id))
+      .orderBy(asc(storyItems.order));
+
+    return {
+      ...storyResult[0].story,
+      category: storyResult[0].category,
+      items
+    };
+  }
+
+  async createStory(data: InsertStory): Promise<Story> {
+    const result = await this.db.insert(stories).values(data).returning();
+    return result[0];
+  }
+
+  async updateStory(id: string, data: Partial<InsertStory>): Promise<Story> {
+    const result = await this.db
+      .update(stories)
+      .set(data)
+      .where(eq(stories.id, id))
+      .returning();
+    
+    if (!result[0]) throw new Error("Story not found");
+    return result[0];
+  }
+
+  async deleteStory(id: string): Promise<void> {
+    await this.db.delete(stories).where(eq(stories.id, id));
+  }
+
+  async incrementStoryViews(id: string): Promise<void> {
+    await this.db
+      .update(stories)
+      .set({ viewCount: sql`${stories.viewCount} + 1` })
+      .where(eq(stories.id, id));
+  }
+
+  // Story Items methods
+  async getStoryItems(storyId: string): Promise<StoryItem[]> {
+    return await this.db
+      .select()
+      .from(storyItems)
+      .where(eq(storyItems.storyId, storyId))
+      .orderBy(asc(storyItems.order));
+  }
+
+  async createStoryItem(data: InsertStoryItem): Promise<StoryItem> {
+    const result = await this.db.insert(storyItems).values(data).returning();
+    return result[0];
+  }
+
+  async updateStoryItem(id: string, data: Partial<InsertStoryItem>): Promise<StoryItem> {
+    const result = await this.db
+      .update(storyItems)
+      .set(data)
+      .where(eq(storyItems.id, id))
+      .returning();
+    
+    if (!result[0]) throw new Error("Story item not found");
+    return result[0];
+  }
+
+  async deleteStoryItem(id: string): Promise<void> {
+    await this.db.delete(storyItems).where(eq(storyItems.id, id));
   }
 }

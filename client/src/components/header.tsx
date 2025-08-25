@@ -92,6 +92,15 @@ export default function Header() {
               >
                 Bosh sahifa
               </Link>
+              <Link 
+                href="/stories" 
+                className={`font-medium transition-colors ${
+                  location === "/stories" ? "text-primary" : "hover:text-accent"
+                }`}
+                data-testid="nav-stories"
+              >
+                📖 Stories
+              </Link>
               {categories.map((category) => (
                 <Link
                   key={category.slug}

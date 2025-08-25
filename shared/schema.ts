@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, timestamp, integer, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, timestamp, integer, jsonb, boolean } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -65,6 +65,34 @@ export const pushSubscriptions = pgTable("push_subscriptions", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+// Stories - Instagram-style daily news highlights
+export const stories = pgTable("stories", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  title: text("title").notNull(),
+  description: text("description"),
+  categoryId: varchar("category_id").references(() => categories.id),
+  thumbnail: text("thumbnail"), // Cover image
+  isActive: text("is_active").default("true").notNull(),
+  order: integer("order").default(0).notNull(), // Display order
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  expiresAt: timestamp("expires_at"), // Stories can expire (24 hours)
+  viewCount: integer("view_count").default(0).notNull()
+});
+
+// Story Items - Individual slides in a story
+export const storyItems = pgTable("story_items", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  storyId: varchar("story_id").references(() => stories.id, { onDelete: "cascade" }).notNull(),
+  articleId: varchar("article_id").references(() => articles.id), // Link to article
+  type: text("type").default("image").notNull(), // image, video, text
+  mediaUrl: text("media_url"), // Image or video URL
+  title: text("title"),
+  content: text("content"), // Text content for text slides
+  duration: integer("duration").default(5).notNull(), // Seconds to display
+  order: integer("order").default(0).notNull(), // Order within story
+  createdAt: timestamp("created_at").defaultNow().notNull()
+});
+
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
   password: true,
@@ -98,6 +126,17 @@ export const insertPushSubscriptionSchema = createInsertSchema(pushSubscriptions
   createdAt: true,
 });
 
+export const insertStorySchema = createInsertSchema(stories).omit({
+  id: true,
+  createdAt: true,
+  viewCount: true,
+});
+
+export const insertStoryItemSchema = createInsertSchema(storyItems).omit({
+  id: true,
+  createdAt: true,
+});
+
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
 
@@ -116,6 +155,12 @@ export type InsertNewsletter = z.infer<typeof insertNewsletterSchema>;
 export type PushSubscription = typeof pushSubscriptions.$inferSelect;
 export type InsertPushSubscription = z.infer<typeof insertPushSubscriptionSchema>;
 
+export type Story = typeof stories.$inferSelect;
+export type InsertStory = z.infer<typeof insertStorySchema>;
+
+export type StoryItem = typeof storyItems.$inferSelect;
+export type InsertStoryItem = z.infer<typeof insertStoryItemSchema>;
+
 // Extended types for API responses
 export type ArticleWithCategory = Article & {
   category: Category;
@@ -123,4 +168,15 @@ export type ArticleWithCategory = Article & {
 
 export type CategoryWithCount = Category & {
   articleCount: number;
+};
+
+// Extended types for Stories
+export type StoryWithItems = Story & {
+  category?: Category;
+  items: StoryItem[];
+};
+
+export type StoryWithCategory = Story & {
+  category?: Category;
+  itemCount: number;
 };

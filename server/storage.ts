@@ -1,4 +1,4 @@
-import { type User, type InsertUser, type Article, type InsertArticle, type Category, type InsertCategory, type RssFeed, type InsertRssFeed, type Newsletter, type InsertNewsletter, type PushSubscription, type InsertPushSubscription, type ArticleWithCategory, type CategoryWithCount } from "@shared/schema";
+import { type User, type InsertUser, type Article, type InsertArticle, type Category, type InsertCategory, type RssFeed, type InsertRssFeed, type Newsletter, type InsertNewsletter, type PushSubscription, type InsertPushSubscription, type ArticleWithCategory, type CategoryWithCount, type Story, type InsertStory, type StoryWithCategory, type StoryWithItems, type StoryItem, type InsertStoryItem } from "@shared/schema";
 import { randomUUID } from "crypto";
 
 export interface IStorage {
@@ -44,6 +44,21 @@ export interface IStorage {
   getAllActivePushSubscriptions(): Promise<PushSubscription[]>;
   deletePushSubscription(endpoint: string): Promise<void>;
 
+  // Stories methods
+  getAllStories(): Promise<StoryWithCategory[]>;
+  getActiveStories(): Promise<StoryWithCategory[]>;
+  getStoryById(id: string): Promise<StoryWithItems | undefined>;
+  createStory(data: InsertStory): Promise<Story>;
+  updateStory(id: string, data: Partial<InsertStory>): Promise<Story>;
+  deleteStory(id: string): Promise<void>;
+  incrementStoryViews(id: string): Promise<void>;
+
+  // Story Items methods
+  getStoryItems(storyId: string): Promise<StoryItem[]>;
+  createStoryItem(data: InsertStoryItem): Promise<StoryItem>;
+  updateStoryItem(id: string, data: Partial<InsertStoryItem>): Promise<StoryItem>;
+  deleteStoryItem(id: string): Promise<void>;
+
   // Admin methods
   updateArticleFeatured(id: string, isFeatured: string): Promise<void>;
   updateArticleBreaking(id: string, isBreaking: string): Promise<void>;
@@ -59,6 +74,8 @@ export class MemStorage implements IStorage {
   private rssFeeds: Map<string, RssFeed>;
   private newsletters: Map<string, Newsletter>;
   private pushSubscriptions: Map<string, PushSubscription>;
+  private stories: Map<string, Story>;
+  private storyItems: Map<string, StoryItem>;
 
   constructor() {
     this.users = new Map();
@@ -67,6 +84,8 @@ export class MemStorage implements IStorage {
     this.rssFeeds = new Map();
     this.newsletters = new Map();
     this.pushSubscriptions = new Map();
+    this.stories = new Map();
+    this.storyItems = new Map();
     
     // Initialize with default categories
     this.initializeDefaultData();
@@ -551,6 +570,115 @@ export class MemStorage implements IStorage {
         break;
       }
     }
+  }
+
+  // Stories methods
+  async getAllStories(): Promise<StoryWithCategory[]> {
+    const storiesArray = Array.from(this.stories.values());
+    return storiesArray.map(story => ({
+      ...story,
+      category: story.categoryId ? this.categories.get(story.categoryId) : undefined,
+      itemCount: Array.from(this.storyItems.values()).filter(item => item.storyId === story.id).length
+    }));
+  }
+
+  async getActiveStories(): Promise<StoryWithCategory[]> {
+    const now = new Date();
+    const allStories = await this.getAllStories();
+    return allStories.filter(story => 
+      story.isActive === "true" && 
+      (!story.expiresAt || new Date(story.expiresAt) > now)
+    ).sort((a, b) => a.order - b.order);
+  }
+
+  async getStoryById(id: string): Promise<StoryWithItems | undefined> {
+    const story = this.stories.get(id);
+    if (!story) return undefined;
+
+    const items = Array.from(this.storyItems.values())
+      .filter(item => item.storyId === id)
+      .sort((a, b) => a.order - b.order);
+
+    return {
+      ...story,
+      category: story.categoryId ? this.categories.get(story.categoryId) : undefined,
+      items
+    };
+  }
+
+  async createStory(data: InsertStory): Promise<Story> {
+    const id = randomUUID();
+    const story: Story = {
+      id,
+      ...data,
+      isActive: data.isActive || "true",
+      order: data.order || 0,
+      viewCount: 0,
+      createdAt: new Date()
+    };
+    this.stories.set(id, story);
+    return story;
+  }
+
+  async updateStory(id: string, data: Partial<InsertStory>): Promise<Story> {
+    const story = this.stories.get(id);
+    if (!story) throw new Error("Story not found");
+
+    const updatedStory = { ...story, ...data };
+    this.stories.set(id, updatedStory);
+    return updatedStory;
+  }
+
+  async deleteStory(id: string): Promise<void> {
+    this.stories.delete(id);
+    // Delete all story items as well
+    for (const [itemId, item] of Array.from(this.storyItems.entries())) {
+      if (item.storyId === id) {
+        this.storyItems.delete(itemId);
+      }
+    }
+  }
+
+  async incrementStoryViews(id: string): Promise<void> {
+    const story = this.stories.get(id);
+    if (story) {
+      story.viewCount = (story.viewCount || 0) + 1;
+      this.stories.set(id, story);
+    }
+  }
+
+  // Story Items methods
+  async getStoryItems(storyId: string): Promise<StoryItem[]> {
+    return Array.from(this.storyItems.values())
+      .filter(item => item.storyId === storyId)
+      .sort((a, b) => a.order - b.order);
+  }
+
+  async createStoryItem(data: InsertStoryItem): Promise<StoryItem> {
+    const id = randomUUID();
+    const item: StoryItem = {
+      id,
+      ...data,
+      type: data.type || "image",
+      duration: data.duration || 5,
+      order: data.order || 0,
+      createdAt: new Date()
+    };
+    this.storyItems.set(id, item);
+    return item;
+  }
+
+  async updateStoryItem(id: string, data: Partial<InsertStoryItem>): Promise<StoryItem> {
+    const item = this.storyItems.get(id);
+    if (!item) throw new Error("Story item not found");
+
+    const updatedItem = { ...item, ...data };
+    this.storyItems.set(id, updatedItem);
+    return updatedItem;
+  }
+
+  async deleteStoryItem(id: string): Promise<void> {
+    this.storyItems.delete(id);
   }
 }
 

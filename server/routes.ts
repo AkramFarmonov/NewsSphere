@@ -5,7 +5,7 @@ import { MemStorage } from "./storage";
 import { AuthService, createSessionUser, type SessionUser } from "./auth";
 import { requireAuth, requireAdmin } from "./middleware/auth";
 import { rssParser } from "./services/rss-parser";
-import { insertNewsletterSchema, insertUserSchema, insertPushSubscriptionSchema } from "@shared/schema";
+import { insertNewsletterSchema, insertUserSchema, insertPushSubscriptionSchema, insertStorySchema, insertStoryItemSchema } from "@shared/schema";
 import { z } from "zod";
 import { registerImageRoutes } from "./routes/images";
 import { PushNotificationService } from "./services/push-notifications";
@@ -296,6 +296,149 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ message: "Test notification sent to all subscribers" });
     } catch (error) {
       res.status(500).json({ error: "Failed to send test notification" });
+    }
+  });
+
+  // Stories API
+  // Get all active stories
+  app.get("/api/stories", async (_req, res) => {
+    try {
+      const stories = await storage.getActiveStories();
+      res.json(stories);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch stories" });
+    }
+  });
+
+  // Get story by ID with items
+  app.get("/api/stories/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const story = await storage.getStoryById(id);
+      
+      if (!story) {
+        return res.status(404).json({ error: "Story not found" });
+      }
+
+      // Increment view count
+      await storage.incrementStoryViews(id);
+      
+      res.json(story);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch story" });
+    }
+  });
+
+  // Admin Stories API
+  // Get all stories (admin only)
+  app.get("/api/admin/stories", requireAdmin, async (_req, res) => {
+    try {
+      const stories = await storage.getAllStories();
+      res.json(stories);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch stories" });
+    }
+  });
+
+  // Create story (admin only)
+  app.post("/api/admin/stories", requireAdmin, async (req, res) => {
+    try {
+      const storyData = insertStorySchema.parse(req.body);
+      const story = await storage.createStory(storyData);
+      res.status(201).json(story);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Invalid story data" });
+      }
+      res.status(500).json({ error: "Failed to create story" });
+    }
+  });
+
+  // Update story (admin only)
+  app.put("/api/admin/stories/:id", requireAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const updateData = insertStorySchema.partial().parse(req.body);
+      const story = await storage.updateStory(id, updateData);
+      res.json(story);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Invalid story data" });
+      }
+      if (error.message === "Story not found") {
+        return res.status(404).json({ error: "Story not found" });
+      }
+      res.status(500).json({ error: "Failed to update story" });
+    }
+  });
+
+  // Delete story (admin only)
+  app.delete("/api/admin/stories/:id", requireAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      await storage.deleteStory(id);
+      res.json({ message: "Story deleted successfully" });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to delete story" });
+    }
+  });
+
+  // Story Items API
+  // Get story items
+  app.get("/api/stories/:storyId/items", async (req, res) => {
+    try {
+      const { storyId } = req.params;
+      const items = await storage.getStoryItems(storyId);
+      res.json(items);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch story items" });
+    }
+  });
+
+  // Create story item (admin only)
+  app.post("/api/admin/stories/:storyId/items", requireAdmin, async (req, res) => {
+    try {
+      const { storyId } = req.params;
+      const itemData = insertStoryItemSchema.parse({
+        ...req.body,
+        storyId
+      });
+      const item = await storage.createStoryItem(itemData);
+      res.status(201).json(item);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Invalid story item data" });
+      }
+      res.status(500).json({ error: "Failed to create story item" });
+    }
+  });
+
+  // Update story item (admin only)
+  app.put("/api/admin/story-items/:id", requireAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const updateData = insertStoryItemSchema.partial().parse(req.body);
+      const item = await storage.updateStoryItem(id, updateData);
+      res.json(item);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Invalid story item data" });
+      }
+      if (error.message === "Story item not found") {
+        return res.status(404).json({ error: "Story item not found" });
+      }
+      res.status(500).json({ error: "Failed to update story item" });
+    }
+  });
+
+  // Delete story item (admin only)
+  app.delete("/api/admin/story-items/:id", requireAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      await storage.deleteStoryItem(id);
+      res.json({ message: "Story item deleted successfully" });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to delete story item" });
     }
   });
 
