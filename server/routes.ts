@@ -622,7 +622,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(500).json({ error: "AI Generator not available" });
       }
 
-      const result = await aiGenerator.translateAndRewriteArticle(title, content, category);
+      const result = await aiGenerator.translateAndRewriteArticleMultiLang(title, content, category);
       res.json(result);
     } catch (error) {
       console.error("AI translation test error:", error);

@@ -88,7 +88,7 @@ export class RssParser {
       .trim();
   }
 
-  async parseFeed(feedUrl: string, categoryId: string, sourceName: string): Promise<InsertArticle[]> {
+  async parseFeed(feedUrl: string, categoryId: string, sourceName: string): Promise<{ articleData: InsertArticle; translations: any }[]> {
     try {
       const xmlContent = await this.fetchFeedContent(feedUrl);
       const parsed: RssFeed = await parseStringPromise(xmlContent);
@@ -151,30 +151,24 @@ export class RssParser {
           : new Date();
         
         // AI orqali maqolani yaxshilash va tarjima qilish
-        let enhancedArticle: { title: string; slug: string; description?: string; content?: string } = {
-          title,
-          slug,
-          description,
-          content
-        };
+        let enhancedArticle: { slug: string } = { slug };
         let aiImageKeywords: string[] = [];
+        let aiTranslations: any = null;
 
         try {
           if (process.env.GEMINI_API_KEY && content && aiGenerator) {
             const category = await storage.getCategoryById(categoryId);
             if (category) {
-              const enhanced = await aiGenerator.translateAndRewriteArticle(
+              const enhanced = await aiGenerator.translateAndRewriteArticleMultiLang(
                 title,
                 content,
                 category
               );
               enhancedArticle = {
-                title: enhanced.title,
-                slug: enhanced.slug,
-                description: enhanced.description,
-                content: enhanced.content
+                slug: enhanced.slug
               };
               aiImageKeywords = enhanced.imageKeywords || [];
+              aiTranslations = enhanced; // Store for later use
               
               // Agar rasm hali topilmagan bo'lsa va AI keywords bor bo'lsa, ulardan foydalanish
               if (!imageUrl && aiImageKeywords.length > 0) {
@@ -193,10 +187,7 @@ export class RssParser {
         }
 
         const article: InsertArticle = {
-          title: enhancedArticle.title,
           slug: enhancedArticle.slug,
-          description: enhancedArticle.description,
-          content: enhancedArticle.content,
           imageUrl,
           imageAttribution,
           imageAuthor,
@@ -209,7 +200,11 @@ export class RssParser {
           isFeatured: "false"
         };
         
-        articles.push(article);
+        // Store article with translations for processing
+        articles.push({ 
+          articleData: article, 
+          translations: aiTranslations 
+        });
       }
       
       return articles;
@@ -228,8 +223,45 @@ export class RssParser {
         console.log(`Fetching RSS feed: ${feed.name}`);
         const articles = await this.parseFeed(feed.url, feed.categoryId, feed.name);
         
-        for (const article of articles) {
-          const createdArticle = await storage.createArticle(article);
+        for (const articleWithTranslations of articles) {
+          const { articleData, translations } = articleWithTranslations;
+          const createdArticle = await storage.createArticle(articleData);
+          
+          // Create multilingual translations if AI generated them
+          if (translations) {
+            try {
+              // Uzbek translation
+              await storage.createArticleTranslation({
+                articleId: createdArticle.id,
+                languageCode: 'uz',
+                title: translations.uz.title,
+                description: translations.uz.description,
+                content: translations.uz.content
+              });
+              
+              // Russian translation
+              await storage.createArticleTranslation({
+                articleId: createdArticle.id,
+                languageCode: 'ru',
+                title: translations.ru.title,
+                description: translations.ru.description,
+                content: translations.ru.content
+              });
+              
+              // English translation
+              await storage.createArticleTranslation({
+                articleId: createdArticle.id,
+                languageCode: 'en',
+                title: translations.en.title,
+                description: translations.en.description,
+                content: translations.en.content
+              });
+              
+              console.log(`Created multilingual translations for article: ${createdArticle.id}`);
+            } catch (error) {
+              console.error(`Failed to create translations for article ${createdArticle.id}:`, error);
+            }
+          }
           
           // Telegram kanaliga yuborish
           try {
