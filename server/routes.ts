@@ -323,9 +323,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get all active stories
   app.get("/api/stories", async (_req, res) => {
     try {
-      const stories = await storage.getActiveStories();
-      res.json(stories);
+      console.log("DEBUG: Fetching stories...");
+      
+      // Direct SQL test to bypass potential Drizzle issues
+      const { neon } = await import("@neondatabase/serverless");
+      const connectionString = process.env.DATABASE_URL!;
+      // Fix connection string format if missing protocol
+      const fullConnectionString = connectionString.startsWith('postgresql://') 
+        ? connectionString 
+        : `postgresql://${connectionString}`;
+      console.log("DEBUG: Using connection string:", fullConnectionString.substring(0, 30) + "...");
+      const sql = neon(fullConnectionString);
+      
+      const directStories = await sql`
+        SELECT id, title, is_active, expires_at 
+        FROM stories 
+        WHERE is_active = 'true' 
+        AND (expires_at IS NULL OR expires_at > NOW())
+        ORDER BY "order" ASC, created_at DESC
+      `;
+      
+      console.log("DEBUG: Direct SQL stories count:", directStories.length);
+      console.log("DEBUG: Direct SQL first story:", directStories[0]);
+      
+      if (directStories.length > 0) {
+        // If direct SQL works, format the response
+        res.json(directStories.map(story => ({
+          id: story.id,
+          title: story.title,
+          isActive: story.is_active,
+          expiresAt: story.expires_at,
+          category: null,
+          itemCount: 0
+        })));
+        return;
+      }
+      
+      // Fallback to Drizzle
+      const allStories = await storage.getAllStories();
+      console.log("DEBUG: Drizzle stories count:", allStories.length);
+      
+      const activeStories = await storage.getActiveStories();
+      console.log("DEBUG: Active Drizzle stories count:", activeStories.length);
+      
+      res.json(activeStories);
     } catch (error) {
+      console.error("DEBUG: Stories API error:", error);
       res.status(500).json({ error: "Failed to fetch stories" });
     }
   });

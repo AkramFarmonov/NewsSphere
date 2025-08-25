@@ -408,26 +408,73 @@ export class DbStorage implements IStorage {
 
   // Stories methods
   async getAllStories(): Promise<StoryWithCategory[]> {
-    const result = await this.db
-      .select({
-        story: stories,
-        category: categories,
-        itemCount: sql<number>`cast(count(${storyItems.id}) as int)`
-      })
-      .from(stories)
-      .leftJoin(categories, eq(stories.categoryId, categories.id))
-      .leftJoin(storyItems, eq(stories.id, storyItems.storyId))
-      .groupBy(stories.id, categories.id)
-      .orderBy(desc(stories.createdAt));
+    try {
+      console.log("DEBUG: Starting getAllStories query");
+      
+      // Test simple select first
+      const simpleTest = await this.db.select().from(stories);
+      console.log("DEBUG: getAllStories simple test count:", simpleTest.length);
+      
+      if (simpleTest.length === 0) {
+        console.log("DEBUG: No stories in table at all");
+        return [];
+      }
 
-    return result.map(row => ({
-      ...row.story,
-      category: row.category || undefined,
-      itemCount: row.itemCount || 0
-    }));
+      const result = await this.db
+        .select({
+          story: stories,
+          category: categories,
+          itemCount: sql<number>`cast(count(${storyItems.id}) as int)`
+        })
+        .from(stories)
+        .leftJoin(categories, eq(stories.categoryId, categories.id))
+        .leftJoin(storyItems, eq(stories.id, storyItems.storyId))
+        .groupBy(stories.id, categories.id)
+        .orderBy(desc(stories.createdAt));
+
+      console.log("DEBUG: getAllStories complex query result count:", result.length);
+
+      return result.map(row => ({
+        ...row.story,
+        category: row.category || undefined,
+        itemCount: row.itemCount || 0
+      }));
+    } catch (error) {
+      console.error("DEBUG: getAllStories error:", error);
+      return [];
+    }
   }
 
   async getActiveStories(): Promise<StoryWithCategory[]> {
+    console.log("DEBUG: Starting getActiveStories query");
+    
+    // First test: simple select from stories table only
+    const simpleStories = await this.db.select().from(stories);
+    console.log("DEBUG: Simple stories count:", simpleStories.length);
+    
+    if (simpleStories.length === 0) {
+      console.log("DEBUG: No stories found in table");
+      return [];
+    }
+    
+    // Second test: with basic filter
+    const filteredStories = await this.db
+      .select()
+      .from(stories)
+      .where(eq(stories.isActive, "true"));
+    
+    console.log("DEBUG: Filtered stories count:", filteredStories.length);
+    
+    if (filteredStories.length === 0) {
+      console.log("DEBUG: No active stories found, checking isActive values");
+      const allStoriesWithActive = await this.db
+        .select({ id: stories.id, title: stories.title, isActive: stories.isActive })
+        .from(stories);
+      console.log("DEBUG: All stories with isActive values:", allStoriesWithActive);
+      return [];
+    }
+    
+    // Original complex query if simple ones work
     const result = await this.db
       .select({
         story: stories,
@@ -449,6 +496,8 @@ export class DbStorage implements IStorage {
       .groupBy(stories.id, categories.id)
       .orderBy(asc(stories.order), desc(stories.createdAt));
 
+    console.log("DEBUG: Final result count:", result.length);
+    
     return result.map(row => ({
       ...row.story,
       category: row.category || undefined,
