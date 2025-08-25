@@ -77,7 +77,7 @@ export default function Header() {
             {/* Logo */}
             <Link href="/" className="flex items-center space-x-3" data-testid="link-logo">
               <img 
-                src="/logo.png" 
+                src="/logo.png?v=2" 
                 alt="RealNews" 
                 className="h-10 w-auto"
               />
