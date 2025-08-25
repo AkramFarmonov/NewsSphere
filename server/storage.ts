@@ -1,5 +1,6 @@
 import { type User, type InsertUser, type Article, type InsertArticle, type Category, type InsertCategory, type RssFeed, type InsertRssFeed, type Newsletter, type InsertNewsletter, type PushSubscription, type InsertPushSubscription, type ArticleWithCategory, type CategoryWithCount, type Story, type InsertStory, type StoryWithCategory, type StoryWithItems, type StoryItem, type InsertStoryItem } from "@shared/schema";
 import { randomUUID } from "crypto";
+import bcrypt from "bcryptjs";
 
 export interface IStorage {
   // User methods
@@ -92,6 +93,9 @@ export class MemStorage implements IStorage {
   }
 
   private async initializeDefaultData() {
+    // Create admin user first
+    await this.initializeAdminUser();
+
     const defaultCategories = [
       { name: "O'zbekiston", slug: "ozbekiston", icon: "fas fa-flag", color: "#1a365d" },
       { name: "Dunyo", slug: "dunyo", icon: "fas fa-globe", color: "#2d3748" },
@@ -116,6 +120,24 @@ export class MemStorage implements IStorage {
     
     // Initialize sample articles
     await this.initializeSampleArticles();
+  }
+
+  private async initializeAdminUser() {
+    // Create admin user with hashed password
+    const hashedPassword = await bcrypt.hash("Gisobot201415*", 12);
+    
+    const adminUser: User = {
+      id: randomUUID(),
+      username: "Akramjon",
+      email: "admin@realnews.uz",
+      password: hashedPassword,
+      role: "admin",
+      isActive: "true",
+      createdAt: new Date()
+    };
+
+    this.users.set(adminUser.id, adminUser);
+    console.log("Admin user created: username = Akramjon");
   }
 
   private async initializeRSSFeeds() {

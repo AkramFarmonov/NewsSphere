@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import { apiRequest } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,7 +25,8 @@ import {
   Eye,
   EyeOff,
   Star,
-  StarOff
+  StarOff,
+  LogIn
 } from "lucide-react";
 import type { Article, Category, RssFeed, Newsletter } from "@shared/schema";
 
@@ -36,6 +38,7 @@ interface AdminStats {
 }
 
 export default function AdminPage() {
+  const [, setLocation] = useLocation();
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [newArticle, setNewArticle] = useState({
     title: "",
@@ -56,6 +59,56 @@ export default function AdminPage() {
   
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  // Check authentication status
+  const { data: currentUser, isLoading: authLoading, error: authError } = useQuery({
+    queryKey: ["/api/auth/me"],
+    retry: false
+  });
+
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (!authLoading && (authError || !currentUser)) {
+      toast({
+        title: "Autentifikatsiya kerak",
+        description: "Admin panelga kirish uchun tizimga kiring",
+        variant: "destructive",
+      });
+      setLocation("/login");
+    }
+  }, [authLoading, authError, currentUser, setLocation, toast]);
+
+  // Show loading while checking authentication
+  if (authLoading) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+            <p className="text-muted-foreground">Autentifikatsiya tekshirilmoqda...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show login prompt if not authenticated
+  if (authError || !currentUser) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <LogIn className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+            <h2 className="text-xl font-semibold mb-2">Autentifikatsiya kerak</h2>
+            <p className="text-muted-foreground mb-4">Admin panelga kirish uchun tizimga kiring</p>
+            <Button onClick={() => setLocation("/login")}>
+              Kirish sahifasiga o'tish
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   // Queries
   const { data: articles = [] } = useQuery<Article[]>({
