@@ -9,10 +9,11 @@ import {
   DialogTrigger 
 } from "@/components/ui/dialog";
 import { usePushNotifications } from "@/hooks/use-push-notifications";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export function PushNotificationButton() {
   const [showDialog, setShowDialog] = useState(false);
+  const [hasAutoShown, setHasAutoShown] = useState(false);
   const {
     isSupported,
     permission,
@@ -23,6 +24,21 @@ export function PushNotificationButton() {
     unsubscribe
   } = usePushNotifications();
 
+  // 1 daqiqadan keyin avtomatik popup
+  useEffect(() => {
+    // Agar qo'llab-quvvatlanmasa yoki allaqachon obuna bo'lgan bo'lsa, timer ishlatmaymiz
+    if (!isSupported || isSubscribed || permission === 'granted' || hasAutoShown) {
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      setShowDialog(true);
+      setHasAutoShown(true);
+    }, 60 * 1000); // 1 daqiqa = 60 sekund
+
+    return () => clearTimeout(timer);
+  }, [isSupported, isSubscribed, permission, hasAutoShown]);
+
   // Brauzer qo'llab-quvvatlamasa, hech narsa ko'rsatmaymiz
   if (!isSupported) {
     return null;
@@ -32,6 +48,7 @@ export function PushNotificationButton() {
     const success = await requestPermission();
     if (success) {
       setShowDialog(false);
+      setHasAutoShown(true); // Muvaffaqiyatli obuna bo'lgandan keyin boshqa popup ko'rsatmaymiz
     }
   };
 
@@ -121,7 +138,10 @@ export function PushNotificationButton() {
             </Button>
             <Button
               variant="outline"
-              onClick={() => setShowDialog(false)}
+              onClick={() => {
+                setShowDialog(false);
+                setHasAutoShown(true); // "Keyinroq" tugmasini bosgandan keyin qayta ko'rsatmaymiz
+              }}
               className="w-full"
               data-testid="button-cancel-notifications"
             >
