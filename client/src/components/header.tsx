@@ -4,6 +4,7 @@ import { Search, Menu, X, Calendar, Thermometer } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useCategories, useSearchArticles } from "@/hooks/use-news";
+import { PushNotificationButton } from "@/components/push-notification-button";
 
 export default function Header() {
   const [location] = useLocation();
@@ -107,6 +108,8 @@ export default function Header() {
 
             {/* Search and Mobile Menu */}
             <div className="flex items-center space-x-4">
+              {/* Push Notifications */}
+              <PushNotificationButton />
               {/* Desktop Search */}
               <div className="relative hidden md:block">
                 <form onSubmit={handleSearchSubmit}>

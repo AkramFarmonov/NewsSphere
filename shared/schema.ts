@@ -56,6 +56,15 @@ export const newsletters = pgTable("newsletters", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+export const pushSubscriptions = pgTable("push_subscriptions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  endpoint: text("endpoint").notNull().unique(),
+  keys: jsonb("keys").notNull(), // {p256dh: string, auth: string}
+  userAgent: text("user_agent"),
+  isActive: text("is_active").default("true").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
   password: true,
@@ -84,6 +93,11 @@ export const insertNewsletterSchema = createInsertSchema(newsletters).omit({
   createdAt: true,
 });
 
+export const insertPushSubscriptionSchema = createInsertSchema(pushSubscriptions).omit({
+  id: true,
+  createdAt: true,
+});
+
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
 
@@ -98,6 +112,9 @@ export type InsertRssFeed = z.infer<typeof insertRssFeedSchema>;
 
 export type Newsletter = typeof newsletters.$inferSelect;
 export type InsertNewsletter = z.infer<typeof insertNewsletterSchema>;
+
+export type PushSubscription = typeof pushSubscriptions.$inferSelect;
+export type InsertPushSubscription = z.infer<typeof insertPushSubscriptionSchema>;
 
 // Extended types for API responses
 export type ArticleWithCategory = Article & {

@@ -1,4 +1,4 @@
-import { type User, type InsertUser, type Article, type InsertArticle, type Category, type InsertCategory, type RssFeed, type InsertRssFeed, type Newsletter, type InsertNewsletter, type ArticleWithCategory, type CategoryWithCount } from "@shared/schema";
+import { type User, type InsertUser, type Article, type InsertArticle, type Category, type InsertCategory, type RssFeed, type InsertRssFeed, type Newsletter, type InsertNewsletter, type PushSubscription, type InsertPushSubscription, type ArticleWithCategory, type CategoryWithCount } from "@shared/schema";
 import { randomUUID } from "crypto";
 
 export interface IStorage {
@@ -39,6 +39,11 @@ export interface IStorage {
   getNewsletterByEmail(email: string): Promise<Newsletter | undefined>;
   getAllNewsletters(): Promise<Newsletter[]>;
 
+  // Push Subscription methods
+  createPushSubscription(subscription: InsertPushSubscription): Promise<PushSubscription>;
+  getAllActivePushSubscriptions(): Promise<PushSubscription[]>;
+  deletePushSubscription(endpoint: string): Promise<void>;
+
   // Admin methods
   updateArticleFeatured(id: string, isFeatured: string): Promise<void>;
   updateArticleBreaking(id: string, isBreaking: string): Promise<void>;
@@ -53,6 +58,7 @@ export class MemStorage implements IStorage {
   private articles: Map<string, Article>;
   private rssFeeds: Map<string, RssFeed>;
   private newsletters: Map<string, Newsletter>;
+  private pushSubscriptions: Map<string, PushSubscription>;
 
   constructor() {
     this.users = new Map();
@@ -60,6 +66,7 @@ export class MemStorage implements IStorage {
     this.articles = new Map();
     this.rssFeeds = new Map();
     this.newsletters = new Map();
+    this.pushSubscriptions = new Map();
     
     // Initialize with default categories
     this.initializeDefaultData();
@@ -517,6 +524,33 @@ export class MemStorage implements IStorage {
 
   async getCategoryById(id: string): Promise<Category | undefined> {
     return this.categories.get(id);
+  }
+
+  // Push Subscription methods
+  async createPushSubscription(insertSubscription: InsertPushSubscription): Promise<PushSubscription> {
+    const id = randomUUID();
+    const subscription: PushSubscription = {
+      id,
+      ...insertSubscription,
+      isActive: insertSubscription.isActive || "true",
+      userAgent: insertSubscription.userAgent || null,
+      createdAt: new Date()
+    };
+    this.pushSubscriptions.set(id, subscription);
+    return subscription;
+  }
+
+  async getAllActivePushSubscriptions(): Promise<PushSubscription[]> {
+    return Array.from(this.pushSubscriptions.values()).filter(sub => sub.isActive === "true");
+  }
+
+  async deletePushSubscription(endpoint: string): Promise<void> {
+    for (const [id, subscription] of Array.from(this.pushSubscriptions.entries())) {
+      if (subscription.endpoint === endpoint) {
+        this.pushSubscriptions.delete(id);
+        break;
+      }
+    }
   }
 }
 

@@ -5,13 +5,15 @@ import { MemStorage } from "./storage";
 import { AuthService, createSessionUser, type SessionUser } from "./auth";
 import { requireAuth, requireAdmin } from "./middleware/auth";
 import { rssParser } from "./services/rss-parser";
-import { insertNewsletterSchema, insertUserSchema } from "@shared/schema";
+import { insertNewsletterSchema, insertUserSchema, insertPushSubscriptionSchema } from "@shared/schema";
 import { z } from "zod";
 import { registerImageRoutes } from "./routes/images";
+import { PushNotificationService } from "./services/push-notifications";
 
 // Use memory storage if DATABASE_URL is not available, otherwise use DB storage
 const storage = process.env.DATABASE_URL ? new DbStorage() : new MemStorage();
 const authService = new AuthService(storage as any);
+const pushService = new PushNotificationService(storage as any);
 
 // Extend express-session types
 declare module 'express-session' {
@@ -240,6 +242,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Invalid email address" });
       }
       res.status(500).json({ error: "Failed to subscribe to newsletter" });
+    }
+  });
+
+  // Push Notifications API
+  // Get VAPID public key for frontend
+  app.get("/api/push/vapid-key", async (_req, res) => {
+    try {
+      const publicKey = pushService.getVapidPublicKey();
+      res.json({ publicKey });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to get VAPID key" });
+    }
+  });
+
+  // Subscribe to push notifications
+  app.post("/api/push/subscribe", async (req, res) => {
+    try {
+      const subscriptionData = insertPushSubscriptionSchema.parse({
+        ...req.body,
+        userAgent: req.get('User-Agent') || null
+      });
+      
+      const subscription = await storage.createPushSubscription(subscriptionData);
+      res.status(201).json({ 
+        message: "Successfully subscribed to push notifications", 
+        id: subscription.id 
+      });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Invalid subscription data" });
+      }
+      res.status(500).json({ error: "Failed to subscribe to push notifications" });
+    }
+  });
+
+  // Send test push notification (admin only)
+  app.post("/api/push/test", requireAdmin, async (req, res) => {
+    try {
+      const { title, body, url } = req.body;
+      
+      if (!title || !body) {
+        return res.status(400).json({ error: "Title and body are required" });
+      }
+
+      await pushService.sendToAllSubscribers({
+        title,
+        body,
+        url: url || '/',
+        icon: '/icon-192.png'
+      });
+
+      res.json({ message: "Test notification sent to all subscribers" });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to send test notification" });
     }
   });
 

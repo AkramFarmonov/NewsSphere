@@ -2,12 +2,13 @@ import { drizzle } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
 import { eq, desc, asc, like, and, or, sql } from 'drizzle-orm';
 import { 
-  users, categories, articles, rssFeeds, newsletters,
+  users, categories, articles, rssFeeds, newsletters, pushSubscriptions,
   type User, type InsertUser, 
   type Article, type InsertArticle, 
   type Category, type InsertCategory, 
   type RssFeed, type InsertRssFeed, 
   type Newsletter, type InsertNewsletter,
+  type PushSubscription, type InsertPushSubscription,
   type ArticleWithCategory, type CategoryWithCount 
 } from "@shared/schema";
 import type { IStorage } from "./storage";
@@ -380,5 +381,25 @@ export class DbStorage implements IStorage {
         imageAuthorUrl: imageAuthorUrl || null
       })
       .where(eq(articles.id, id));
+  }
+
+  // Push Subscription methods
+  async createPushSubscription(insertSubscription: InsertPushSubscription): Promise<PushSubscription> {
+    const result = await this.db.insert(pushSubscriptions).values(insertSubscription).returning();
+    return result[0];
+  }
+
+  async getAllActivePushSubscriptions(): Promise<PushSubscription[]> {
+    return await this.db
+      .select()
+      .from(pushSubscriptions)
+      .where(eq(pushSubscriptions.isActive, "true"))
+      .orderBy(desc(pushSubscriptions.createdAt));
+  }
+
+  async deletePushSubscription(endpoint: string): Promise<void> {
+    await this.db
+      .delete(pushSubscriptions)
+      .where(eq(pushSubscriptions.endpoint, endpoint));
   }
 }
