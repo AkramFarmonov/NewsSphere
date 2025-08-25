@@ -2,10 +2,7 @@ import { createRoot } from "react-dom/client";
 import App from "./App";
 import "./index.css";
 
-console.log("RealNews: main.tsx loading...");
-console.log("RealNews: DOM ready, creating root...");
 createRoot(document.getElementById("root")!).render(<App />);
-console.log("RealNews: App rendered successfully!");
 
 // Service Worker'ni ro'yxatdan o'tkazish
 if ('serviceWorker' in navigator) {
