@@ -70,31 +70,31 @@ export class TelegramBot {
 
   private formatArticleCaption(article: ArticleWithCategory): string {
     const categoryIcon = this.getCategoryIcon(article.category.name);
+    const articleUrl = `https://realnews.uz/article/${article.slug}`;
     
-    // To'liq batafsil mazmun - qisqartirmasdan
-    let fullContent = "";
-    
-    // Qisqacha tavsif
-    if (article.description) {
-      fullContent += `${article.description}\n\n`;
-    }
-    
-    // To'liq maqola mazmuni
-    if (article.content && article.content.length > 50) {
-      // Agar mazmun juda uzun bo'lsa, Telegram limitiga mos qilamiz (4096 character)
-      const contentToAdd = article.content.length > 3000 ? 
-        article.content.substring(0, 3000) + "...\n\n📖 To'liq o'qish uchun havolaga bosing:" : 
-        article.content + "\n\n";
-      fullContent += contentToAdd;
-    }
-    
-    const caption = `<b>${article.title}</b>
+    // Batafsil va professional format
+    const caption = `🗞️ <b>${article.title}</b>
 
-${fullContent}
+📝 <b>BATAFSIL MA'LUMOT:</b>
+${article.description || ""}
 
-${categoryIcon} <b>${article.category.name}</b> | ${this.formatDate(article.publishedAt)}
+📄 <b>TO'LIQ MAZMUN:</b>
+${article.content || ""}
 
-📊 Ko'rishlar: ${article.views || 0} | 👍 ${article.likes || 0}`;
+📰 <b>MANBA VA TAFSILOTLAR:</b>
+• Manba: ${article.sourceName || "RealNews"}
+• Nashr vaqti: ${this.formatDate(article.publishedAt)}
+• Kategoriya: ${categoryIcon} ${article.category.name}
+
+📊 <b>STATISTIKA:</b>
+• 👀 Ko'rishlar: ${article.views || 0}
+• 👍 Yoqtirishlar: ${article.likes || 0}
+• 🔗 Manba havolasi: ${article.sourceUrl ? "✅ Mavjud" : "❌ Yo'q"}
+
+🌐 <b>QO'SHIMCHA MA'LUMOT:</b>
+Bu yangilik RealNews.uz platformasida to'liq formatda mavjud. Batafsil tahlil, qo'shimcha ma'lumotlar va bog'liq yangiliklar uchun veb-saytimizga tashrif buyuring.
+
+#${article.category.name.replace(/[^a-zA-Z0-9]/g, '')} #RealNews #Yangiliklar`;
 
     return caption;
   }
