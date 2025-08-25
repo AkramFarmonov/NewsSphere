@@ -1,13 +1,15 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { DbStorage } from "./db-storage";
+import { MemStorage } from "./storage";
 import { AuthService, createSessionUser, type SessionUser } from "./auth";
 import { requireAuth, requireAdmin } from "./middleware/auth";
 import { rssParser } from "./services/rss-parser";
 import { insertNewsletterSchema, insertUserSchema } from "@shared/schema";
 import { z } from "zod";
 
-const storage = new DbStorage();
+// Use memory storage if DATABASE_URL is not available, otherwise use DB storage
+const storage = process.env.DATABASE_URL ? new DbStorage() : new MemStorage();
 const authService = new AuthService(storage);
 
 // Extend express-session types
