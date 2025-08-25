@@ -7,6 +7,19 @@ interface TelegramMessage {
   disable_web_page_preview?: boolean;
 }
 
+interface TelegramPhotoMessage {
+  chat_id: string;
+  photo: string;
+  caption?: string;
+  parse_mode?: "HTML" | "Markdown";
+  reply_markup?: {
+    inline_keyboard: Array<Array<{
+      text: string;
+      url: string;
+    }>>;
+  };
+}
+
 export class TelegramBot {
   private botToken: string;
   private chatId: string;
@@ -26,7 +39,7 @@ export class TelegramBot {
     return !!(this.botToken && this.chatId);
   }
 
-  private async sendRequest(method: string, data: TelegramMessage): Promise<boolean> {
+  private async sendRequest(method: string, data: TelegramMessage | TelegramPhotoMessage): Promise<boolean> {
     if (!this.isConfigured()) {
       console.warn("Telegram Bot not configured, skipping message");
       return false;
@@ -55,23 +68,16 @@ export class TelegramBot {
     }
   }
 
-  private formatArticleMessage(article: ArticleWithCategory, siteUrl: string = "https://realnews.uz"): string {
+  private formatArticleCaption(article: ArticleWithCategory): string {
     const categoryIcon = this.getCategoryIcon(article.category.name);
-    const articleUrl = `${siteUrl}/article/${article.slug}`;
-    const shortUrl = `${siteUrl.replace('https://', '')}/r/${article.id.substring(0, 8)}`;
     
-    // Professional va toza format - kanallaringiz kabi
-    const message = `
-<b>${article.title}</b>
+    const caption = `<b>${article.title}</b>
 
 ${article.description ? article.description.substring(0, 280) + "..." : ""}
 
-👉 <a href="${articleUrl}">${shortUrl}</a>
+${categoryIcon} <b>${article.category.name}</b> | ${this.formatDate(article.publishedAt)}`;
 
-${categoryIcon} <b>${article.category.name}</b> | ${this.formatDate(article.publishedAt)}
-`.trim();
-
-    return message;
+    return caption;
   }
 
   private getCategoryIcon(categoryName: string): string {
@@ -102,19 +108,28 @@ ${categoryIcon} <b>${article.category.name}</b> | ${this.formatDate(article.publ
       return false;
     }
 
-    const message = this.formatArticleMessage(article);
+    const caption = this.formatArticleCaption(article);
+    const articleUrl = `https://realnews.uz/article/${article.slug}`;
     
-    const telegramMessage: TelegramMessage = {
+    const telegramPhotoMessage: TelegramPhotoMessage = {
       chat_id: this.chatId,
-      text: message,
+      photo: article.imageUrl || 'https://via.placeholder.com/800x400/2563eb/ffffff?text=RealNews',
+      caption: caption,
       parse_mode: "HTML",
-      disable_web_page_preview: false
+      reply_markup: {
+        inline_keyboard: [[
+          {
+            text: "Batafsil o'qish ➡️",
+            url: articleUrl
+          }
+        ]]
+      }
     };
 
-    const success = await this.sendRequest("sendMessage", telegramMessage);
+    const success = await this.sendRequest("sendPhoto", telegramPhotoMessage);
     
     if (success) {
-      console.log(`✅ Telegram'ga yuborildi: ${article.title}`);
+      console.log(`✅ Telegram'ga rasm bilan yuborildi: ${article.title}`);
     } else {
       console.error(`❌ Telegram'ga yuborishda xatolik: ${article.title}`);
     }
@@ -127,29 +142,38 @@ ${categoryIcon} <b>${article.category.name}</b> | ${this.formatDate(article.publ
       return false;
     }
 
-    const message = `
-🚨 <b>SHOSHILINCH YANGILIK!</b> 🚨
+    const categoryIcon = this.getCategoryIcon(article.category.name);
+    const articleUrl = `https://realnews.uz/article/${article.slug}`;
+    
+    const caption = `🚨 <b>SHOSHILINCH YANGILIK!</b> 🚨
 
 <b>${article.title}</b>
 
 ${article.description ? article.description.substring(0, 250) + "..." : ""}
 
-<a href="https://realnews.uz/article/${article.slug}">📖 Batafsil ma'lumot</a>
+${categoryIcon} <b>${article.category.name}</b> | ${this.formatDate(article.publishedAt)}
 
-#ShoshilinchYangilik #RealNews
-`.trim();
+#ShoshilinchYangilik #RealNews`;
 
-    const telegramMessage: TelegramMessage = {
+    const telegramPhotoMessage: TelegramPhotoMessage = {
       chat_id: this.chatId,
-      text: message,
+      photo: article.imageUrl || 'https://via.placeholder.com/800x400/dc2626/ffffff?text=🚨+BREAKING+NEWS',
+      caption: caption,
       parse_mode: "HTML",
-      disable_web_page_preview: false
+      reply_markup: {
+        inline_keyboard: [[
+          {
+            text: "📖 Batafsil ma'lumot",
+            url: articleUrl
+          }
+        ]]
+      }
     };
 
-    const success = await this.sendRequest("sendMessage", telegramMessage);
+    const success = await this.sendRequest("sendPhoto", telegramPhotoMessage);
     
     if (success) {
-      console.log(`🚨 Shoshilinch yangilik Telegram'ga yuborildi: ${article.title}`);
+      console.log(`🚨 Shoshilinch yangilik rasm bilan Telegram'ga yuborildi: ${article.title}`);
     }
     
     return success;

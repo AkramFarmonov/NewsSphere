@@ -1,0 +1,47 @@
+Mavzu: Telegram Postlarini Rasm va Tugma Bilan Yangilash
+Maqsad: Telegram kanaliga yuboriladigan har bir yangilik postini maqola rasmi, formatlangan matn (caption) va "Batafsil o'qish" tugmasi bilan ta'minlash orqali uning vizual jozibadorligini va interaktivligini oshirish.
+
+Texnik Reja (Technical Plan)
+1. API Metodini Yangilash
+Hozirda server/services/telegram-bot.ts faylida xabar yuborish uchun ishlatilayotgan sendMessage metodini sendPhoto metodi bilan almashtirish.
+
+2. Kerakli Ma'lumotlarni Tayyorlash
+Har bir maqola uchun quyidagi ma'lumotlarni ma'lumotlar bazasidan olib, sendPhoto metodiga uzatish:
+
+Maqolaning asosiy rasmi (image_url).
+
+Maqolaning sarlavhasi va qisqacha tavsifi (caption uchun).
+
+Maqolaning to'liq manzil havolasi (URL).
+
+3. Xabar Komponentlarini Sozlash
+sendPhoto metodini quyidagi parametrlar bilan chaqirish:
+
+photo: Maqolaning image_url manzili.
+
+caption: Maqola sarlavhasi va qisqacha tavsifidan tuzilgan matn.
+
+parse_mode: 'HTML' qiymatini berib, sarlavhani <b>Sarlavha</b> tegi yordamida qalin (bold) formatlash.
+
+reply_markup: InlineKeyboardButton yordamida xabar ostiga "Batafsil o'qish ➡️" tugmasini yaratish va unga maqolaning to'liq havolasini biriktirish.
+
+Kutilayotgan Natija (Maket)
+Foydalanuvchi Telegramda quyidagi ko'rinishdagi postni qabul qilishi kerak:
+
++-------------------------------------------------+
+|                                                 |
+|         [ MAQOLANING RASMI (UNSPLASH) ]         |
+|                                                 |
++-------------------------------------------------+
+| **Apple shaxsiy sun'iy intellekt terapevti...** |
+|                                                 |
+| Uning asosiy xususiyati ovqatlanish bo'yicha... |
+|                                                 |
+|      +-----------------------------------+      |
+|      |       Batafsil o'qish ➡️        |      |
+|      +-----------------------------------+      |
++-------------------------------------------------+
+Yakuniy Topshiriq
+Topshiriq: server/services/telegram-bot.ts faylidagi xabar yuborish logikasini yuqoridagi reja asosida sendMessage'dan sendPhoto'ga o'zgartiring.
+
+Biznes Maqsadi: Kanalning vizual jozibadorligini va o'quvchilarning postlarga bosish (click-through rate) ko'rsatkichini oshirish.
