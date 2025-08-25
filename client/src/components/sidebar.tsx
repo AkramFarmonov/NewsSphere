@@ -1,45 +1,69 @@
 import { useState } from "react";
 import { Link } from "wouter";
-import { Flame, Cloud, Mail, Share2 } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Flame, Cloud, Mail, Share2, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useTrendingArticles } from "@/hooks/use-news";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { insertNewsletterSchema } from "@shared/schema";
+import { z } from "zod";
 import NewsCard from "./news-card";
+
+// Newsletter form schema with better validation
+const newsletterFormSchema = insertNewsletterSchema.extend({
+  email: z.string().email("Yaroqli email manzil kiriting")
+});
+
+type NewsletterFormData = z.infer<typeof newsletterFormSchema>;
 
 export default function Sidebar() {
   const { data: trendingArticles = [], isLoading } = useTrendingArticles(5);
-  const [email, setEmail] = useState("");
+  const [isNewsletterSubmitted, setIsNewsletterSubmitted] = useState(false);
   const { toast } = useToast();
 
-  const newsletterMutation = useMutation({
-    mutationFn: (email: string) => apiRequest("POST", "/api/newsletter/subscribe", { email }),
-    onSuccess: () => {
-      toast({
-        title: "Muvaffaqiyatli!",
-        description: "Siz muvaffaqiyatli obuna bo'ldingiz!",
-      });
-      setEmail("");
-    },
-    onError: (error: any) => {
-      const message = error.message.includes("409") 
-        ? "Bu email manzili allaqachon obuna bo'lgan"
-        : "Obuna bo'lishda xatolik yuz berdi";
-      toast({
-        title: "Xatolik",
-        description: message,
-        variant: "destructive",
-      });
-    },
+  const newsletterForm = useForm<NewsletterFormData>({
+    resolver: zodResolver(newsletterFormSchema),
+    defaultValues: {
+      email: "",
+      isActive: "true"
+    }
   });
 
-  const handleNewsletterSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (email.trim()) {
-      newsletterMutation.mutate(email.trim());
+  const newsletterMutation = useMutation({
+    mutationFn: (data: NewsletterFormData) => apiRequest("POST", "/api/newsletter/subscribe", data),
+    onSuccess: () => {
+      setIsNewsletterSubmitted(true);
+      newsletterForm.reset();
+      toast({
+        title: "Muvaffaqiyatli obuna bo'ldingiz!",
+        description: "Eng so'nggi yangiliklar elektron pochtangizga yuboriladi."
+      });
+    },
+    onError: (error: any) => {
+      const errorMessage = error.message || "Xatolik yuz berdi";
+      if (errorMessage.includes("already subscribed") || errorMessage.includes("409")) {
+        toast({
+          title: "Allaqachon obuna bo'lgansiz",
+          description: "Bu email manzil bilan avval obuna bo'lingan.",
+          variant: "destructive"
+        });
+      } else {
+        toast({
+          title: "Obuna bo'lishda xatolik",
+          description: errorMessage,
+          variant: "destructive"
+        });
+      }
     }
+  });
+
+  const onNewsletterSubmit = (data: NewsletterFormData) => {
+    newsletterMutation.mutate(data);
   };
 
   return (
@@ -122,33 +146,81 @@ export default function Sidebar() {
       </div>
 
       {/* Newsletter Subscription */}
-      <div className="bg-white rounded-xl shadow-sm p-6 mb-8" data-testid="newsletter-widget">
-        <h3 className="text-lg font-semibold mb-4 text-primary flex items-center">
-          <Mail className="mr-2 w-5 h-5" />
-          Yangiliklarni elektron pochtaga olish
-        </h3>
-        <p className="text-gray-600 text-sm mb-4">
-          Eng muhim yangiliklarni har kuni elektron pochtangizga olishni xohlaysizmi?
-        </p>
-        <form onSubmit={handleNewsletterSubmit}>
-          <Input
-            type="email"
-            placeholder="Email manzilingiz"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full mb-3"
-            required
-            data-testid="input-newsletter-email"
-          />
-          <Button 
-            type="submit" 
-            className="w-full bg-accent text-white hover:bg-blue-700"
-            disabled={newsletterMutation.isPending}
-            data-testid="button-newsletter-subscribe"
-          >
-            {newsletterMutation.isPending ? "Yuborilmoqda..." : "Obuna bo'lish"}
-          </Button>
-        </form>
+      <div className="bg-gradient-to-r from-accent/10 to-blue-50 rounded-xl p-6 mb-8" data-testid="newsletter-widget">
+        {isNewsletterSubmitted ? (
+          <div className="text-center" data-testid="newsletter-success">
+            <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Mail className="w-6 h-6 text-green-600" />
+            </div>
+            <h3 className="font-semibold text-lg mb-2">Rahmat!</h3>
+            <p className="text-gray-600 text-sm mb-4">
+              Siz muvaffaqiyatli obuna bo'ldingiz. Eng muhim yangiliklar elektron pochtangizga yuboriladi.
+            </p>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => setIsNewsletterSubmitted(false)}
+              data-testid="button-subscribe-again"
+            >
+              Yana obuna bo'lish
+            </Button>
+          </div>
+        ) : (
+          <>
+            <div className="flex items-center mb-4">
+              <div className="w-10 h-10 bg-accent/20 rounded-lg flex items-center justify-center mr-3">
+                <Mail className="w-5 h-5 text-accent" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-lg">Yangiliklar obunasi</h3>
+                <p className="text-gray-600 text-sm">Eng muhim yangiliklardan xabar oling</p>
+              </div>
+            </div>
+            
+            <Form {...newsletterForm}>
+              <form onSubmit={newsletterForm.handleSubmit(onNewsletterSubmit)} className="space-y-4" data-testid="newsletter-form">
+                <FormField
+                  control={newsletterForm.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="sr-only">Email manzil</FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="elektron-pochta@example.com" 
+                          type="email"
+                          className="bg-white"
+                          data-testid="input-newsletter-email"
+                          {...field} 
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <Button 
+                  type="submit" 
+                  disabled={newsletterMutation.isPending}
+                  className="w-full min-h-[44px]"
+                  data-testid="button-newsletter-subscribe"
+                >
+                  {newsletterMutation.isPending ? (
+                    "Obuna bo'lmoqda..."
+                  ) : (
+                    <>
+                      <Send className="w-4 h-4 mr-2" />
+                      Obuna bo'lish
+                    </>
+                  )}
+                </Button>
+              </form>
+            </Form>
+            
+            <p className="text-xs text-gray-500 mt-3 text-center">
+              Bizning maxfiylik siyosatimizga rozilik bildirgan bo'lasiz
+            </p>
+          </>
+        )}
       </div>
 
       {/* Social Media Links */}
