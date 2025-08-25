@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useCategories, useSearchArticles } from "@/hooks/use-news";
 import { PushNotificationButton } from "@/components/push-notification-button";
-import { LanguageSwitcher } from "@/components/language-switcher";
 import { useTranslation } from 'react-i18next';
 
 export default function Header() {
@@ -44,13 +43,13 @@ export default function Header() {
         <div className="py-4 border-b border-gray-100">
           <div className="flex items-center justify-between">
             {/* Logo */}
-            <Link href="/" className="flex items-center space-x-3" data-testid="link-logo">
+            <Link href="/" className="flex items-center space-x-2 sm:space-x-3" data-testid="link-logo">
               <img 
                 src="/logo.png?v=2" 
                 alt="RealNews" 
-                className="h-10 w-auto"
+                className="h-8 sm:h-10 w-auto"
               />
-              <div className="text-2xl font-bold text-primary">
+              <div className="text-xl sm:text-2xl font-bold text-primary">
                 RealNews
               </div>
             </Link>
@@ -120,8 +119,6 @@ export default function Header() {
               {/* Push Notifications */}
               <PushNotificationButton />
               
-              {/* Language Switcher */}
-              <LanguageSwitcher />
 
               {/* Mobile Search Button */}
               <Button
