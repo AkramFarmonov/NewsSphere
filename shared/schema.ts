@@ -184,6 +184,11 @@ export type InsertStoryItem = z.infer<typeof insertStoryItemSchema>;
 export type ArticleWithCategory = Article & {
   category: Category;
   translations?: ArticleTranslation[];
+  // Flattened translation fields for current language
+  title: string;
+  description?: string;
+  content: string;
+  language: string;
 };
 
 export type ArticleWithTranslations = Article & {
