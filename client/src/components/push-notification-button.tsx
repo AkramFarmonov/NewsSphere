@@ -111,14 +111,25 @@ export function PushNotificationButton() {
 
           {error && (
             <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md">
-              {error}
+              <div className="mb-2 font-medium">❌ {error}</div>
+              {permission === 'denied' && (
+                <div className="text-xs space-y-2">
+                  <p className="font-medium">🔧 Qo'lda yoqish uchun:</p>
+                  <div className="space-y-1">
+                    <p><strong>Chrome/Edge:</strong> Address bar yonidagi 🔒 belgi → "Notifications" → "Allow"</p>
+                    <p><strong>Firefox:</strong> Address bar yonidagi 🔒 belgi → "Permissions" → "Notifications" → "Allow"</p>
+                    <p><strong>Safari:</strong> Websites → realnews.uz → "Notifications" → "Allow"</p>
+                  </div>
+                  <p className="mt-2 italic">Keyin sahifani yangilab, qaytadan urinib ko'ring.</p>
+                </div>
+              )}
             </div>
           )}
 
           <div className="flex flex-col gap-2">
             <Button
               onClick={handleSubscribe}
-              disabled={isLoading}
+              disabled={isLoading || permission === 'denied'}
               className="w-full"
               data-testid="button-subscribe-notifications"
             >
@@ -126,6 +137,10 @@ export function PushNotificationButton() {
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Obuna bo'lmoqda...
+                </>
+              ) : permission === 'denied' ? (
+                <>
+                  🔒 Brauzer sozlamalarida yoqing
                 </>
               ) : (
                 <>
@@ -148,9 +163,15 @@ export function PushNotificationButton() {
           </div>
 
           <div className="text-xs text-muted-foreground">
-            <p>
-              💡 <strong>Eslatma:</strong> Bildirishnomalarni istalgan vaqtda sozlamalarda o'chirib qo'yishingiz mumkin.
-            </p>
+            {permission === 'denied' ? (
+              <p>
+                🔄 <strong>Eslatma:</strong> Brauzer sozlamalarini o'zgartirgandan keyin sahifani yangilang.
+              </p>
+            ) : (
+              <p>
+                💡 <strong>Eslatma:</strong> Bildirishnomalarni istalgan vaqtda sozlamalarda o'chirib qo'yishingiz mumkin.
+              </p>
+            )}
           </div>
         </div>
       </DialogContent>

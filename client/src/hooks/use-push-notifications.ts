@@ -67,6 +67,12 @@ export function usePushNotifications() {
 
       if (permission === 'granted') {
         return await subscribeToNotifications();
+      } else if (permission === 'denied') {
+        setState(prev => ({ 
+          ...prev, 
+          error: 'Brauzer sozlamalarida bildirishnomalar bloklab qo\'yilgan' 
+        }));
+        return false;
       } else {
         setState(prev => ({ 
           ...prev, 
