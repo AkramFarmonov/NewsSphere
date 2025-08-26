@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import type { StoryWithCategory, StoryWithItems } from "@shared/schema";
+import type { StoryWithCategory, StoryWithItems } from "@shared/types";
 
 // Get all active stories
 export function useStories() {

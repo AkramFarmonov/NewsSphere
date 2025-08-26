@@ -179,34 +179,3 @@ export type InsertStory = z.infer<typeof insertStorySchema>;
 
 export type StoryItem = typeof storyItems.$inferSelect;
 export type InsertStoryItem = z.infer<typeof insertStoryItemSchema>;
-
-// Extended types for API responses
-export type ArticleWithCategory = Article & {
-  category: Category;
-  translations?: ArticleTranslation[];
-  // Flattened translation fields for current language
-  title: string;
-  description?: string;
-  content: string;
-  language: string;
-};
-
-export type ArticleWithTranslations = Article & {
-  category: Category;
-  translations: ArticleTranslation[];
-};
-
-export type CategoryWithCount = Category & {
-  articleCount: number;
-};
-
-// Extended types for Stories
-export type StoryWithItems = Story & {
-  category?: Category;
-  items: StoryItem[];
-};
-
-export type StoryWithCategory = Story & {
-  category?: Category;
-  itemCount: number;
-};

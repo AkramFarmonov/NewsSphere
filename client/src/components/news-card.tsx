@@ -1,7 +1,7 @@
 import { Link } from "wouter";
 import { Heart, MessageCircle, Share2, Eye, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import type { ArticleWithCategory } from "@shared/schema";
+import type { ArticleWithCategory } from "@shared/types";
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";

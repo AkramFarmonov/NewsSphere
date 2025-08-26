@@ -30,7 +30,7 @@ import {
   StarOff,
   LogIn
 } from "lucide-react";
-import type { Article, Category, RssFeed, Newsletter } from "@shared/schema";
+import type { Article, Category, RssFeed, Newsletter } from "@shared/types";
 
 interface AdminStats {
   totalArticles: number;

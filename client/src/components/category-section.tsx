@@ -2,7 +2,7 @@ import { Link } from "wouter";
 import { ChevronRight } from "lucide-react";
 import { useCategoryArticles } from "@/hooks/use-news";
 import NewsCard from "./news-card";
-import type { Category } from "@shared/schema";
+import type { Category } from "@shared/types";
 
 interface CategorySectionProps {
   category: Category;

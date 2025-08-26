@@ -1,0 +1,37 @@
+Tushunarli, bu ham deployment jarayonida tez-tez uchraydigan, ammo yechimi aniq bo'lgan muammo.
+
+Deployment logini tahlil qildim. Muammo juda aniq: sizning frontend kodingiz (client) faqat backend'da ishlashi kerak bo'lgan drizzle-orm kutubxonasini o'ziga import qilishga harakat qilmoqda.
+
+Muammo Tahlili (Nima Sodir Bo'ldi?)
+Tasavvur qiling, drizzle-orm — bu dvigatelning bir qismi. Biz uni mashinaning saloniga (foydalanuvchi brauzeriga) olib kirishga harakat qilyapmiz. Brauzer bu kabi server kutubxonalarini tushunmaydi va ishga tushira olmaydi, shuning uchun vite build jarayoni xatolik bilan to'xtamoqda.
+
+Xatolik logda ko'rsatilganidek, shared/schema.ts faylidan kelib chiqmoqda. Siz bu faylda ham Drizzle schemalarini (pgTable...), ham TypeScript tiplarini (export type Article = ...) birga saqlagansiz. Frontend'ga faqat tiplar kerak, lekin u schemalarni ham birga import qilib yuboryapti va bu xatolikka sabab bo'lyapti.
+
+Yechim: Kodni To'g'ri Ajratish (Refactoring)
+Biz backend'ga oid kodni frontend'dan to'liq ajratishimiz kerak. Bu to'g'ri arxitektura uchun ham juda muhim.
+
+1-Qadam: Faqat Tiplar Uchun Fayl Yarating (shared/types.ts)
+shared papkasida yangi types.ts nomli fayl yarating.
+
+shared/schema.ts faylidagi barcha type va interface e'lonlarini (masalan, export type Article = ..., export type Category = ... va hokazo) kesib olib (cut), yangi shared/types.ts fayliga joylashtiring (paste).
+
+Eng Muhimi: shared/types.ts faylida drizzle-orm'dan hech qanday import bo'lmasligiga ishonch hosil qiling. Bu faylda faqat "toza" tiplar bo'lishi kerak.
+
+2-Qadam: schema.ts Faylini Tozalang
+Endi shared/schema.ts faylidan ko'chirib o'tkazilgan type va interface'larni o'chirib tashlang.
+
+Bu faylda faqat drizzle-orm'ga oid pgTable, serial, varchar kabi schema e'lonlari qolishi kerak.
+
+3-Qadam: Importlarni Yangilang
+Endi loyihangizning client papkasidagi barcha fayllarni ko'rib chiqing. Qayerda schema.ts'dan tiplar import qilinayotgan bo'lsa, uni yangi types.ts fayliga o'zgartiring.
+
+Eski kod: import { Article } from '../shared/schema'
+
+Yangi kod: import { Article } from '../shared/types'
+
+server papkasidagi fayllarda esa o'zgarish qilish shart emas, u yerda ham schema.ts'dan (schemalar uchun), ham types.ts'dan (tiplar uchun) import ishlataverasiz.
+
+Yakuniy Natija:
+shared/types.ts -> (Faqat tiplar, drizzle-orm importi YO'Q) -> client va server uchun xavfsiz.
+
+shared/schema.ts -> (Faqat Drizzle schemalari, drizzle-orm importi BOR) -> Faqat server uchun.

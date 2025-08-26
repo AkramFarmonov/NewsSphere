@@ -11,13 +11,13 @@ import { useWeatherData } from "@/hooks/use-real-time-data";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { insertNewsletterSchema } from "@shared/schema";
 import { z } from "zod";
 import NewsCard from "./news-card";
 
 // Newsletter form schema with better validation
-const newsletterFormSchema = insertNewsletterSchema.extend({
-  email: z.string().email("Yaroqli email manzil kiriting")
+const newsletterFormSchema = z.object({
+  email: z.string().email("Yaroqli email manzil kiriting"),
+  isActive: z.string().optional().default("true")
 });
 
 type NewsletterFormData = z.infer<typeof newsletterFormSchema>;

@@ -3,7 +3,7 @@ import { X, Play, Pause, ChevronLeft, ChevronRight, ExternalLink } from "lucide-
 import { Button } from "@/components/ui/button";
 import { useStory } from "@/hooks/use-stories";
 import { Link } from "wouter";
-import type { StoryItem } from "@shared/schema";
+import type { StoryItem } from "@shared/types";
 
 interface StoryViewerProps {
   storyId: string;

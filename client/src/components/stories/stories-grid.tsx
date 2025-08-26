@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Play, Clock } from "lucide-react";
 import { useStories } from "@/hooks/use-stories";
 import { StoryViewer } from "./story-viewer";
-import type { StoryWithCategory } from "@shared/schema";
+import type { StoryWithCategory } from "@shared/types";
 
 export function StoriesGrid() {
   const { data: stories = [], isLoading } = useStories();

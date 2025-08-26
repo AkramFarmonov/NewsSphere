@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import type { ArticleWithCategory, CategoryWithCount } from "@shared/schema";
+import type { ArticleWithCategory, CategoryWithCount } from "@shared/types";
 
 export function useCategories() {
   return useQuery<CategoryWithCount[]>({
