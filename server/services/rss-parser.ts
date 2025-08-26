@@ -150,43 +150,14 @@ export class RssParser {
           ? new Date(item.pubDate[0])
           : new Date();
         
-        // AI orqali maqolani yaxshilash va tarjima qilish
+        // AI funksiyasini vaqtincha o'chiramiz - faqat original RSS kontent
         let enhancedArticle: { slug: string } = { slug };
-        let aiImageKeywords: string[] = [];
         let aiTranslations: any = null;
 
-        try {
-          if (process.env.GEMINI_API_KEY && content && aiGenerator) {
-            const category = await storage.getCategoryById(categoryId);
-            if (category) {
-              const enhanced = await aiGenerator.translateAndRewriteArticleMultiLang(
-                title,
-                content,
-                category
-              );
-              enhancedArticle = {
-                slug: enhanced.slug
-              };
-              aiImageKeywords = enhanced.imageKeywords || [];
-              aiTranslations = enhanced; // Store for later use
-              
-              // Agar rasm hali topilmagan bo'lsa va AI keywords bor bo'lsa, ulardan foydalanish
-              if (!imageUrl && aiImageKeywords.length > 0) {
-                const unsplashData = await unsplashService.getArticleImageWithKeywords(aiImageKeywords);
-                if (unsplashData) {
-                  imageUrl = unsplashData.imageUrl;
-                  imageAttribution = unsplashData.attribution;
-                  imageAuthor = unsplashData.author;
-                  imageAuthorUrl = unsplashData.authorUrl;
-                }
-              }
-            }
-          }
-        } catch (error) {
-          console.error("AI enhancement failed, using original content:", error);
-        }
-
         const article: InsertArticle = {
+          title,
+          description,
+          content,
           slug: enhancedArticle.slug,
           imageUrl,
           imageAttribution,
