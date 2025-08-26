@@ -18,13 +18,10 @@ services:
     name: realnews-frontend
     buildCommand: npm install && npx vite build
     staticPublishPath: ./dist/public
+    headers:
+      - key: "/*"
+        value: "X-Frame-Options: DENY"
     routes:
-      - type: rewrite
-        source: /api/:path*
-        destination: https://realnews-backend.onrender.com/api/:path*
-      - type: rewrite
-        source: /admin/:path*
-        destination: https://realnews-backend.onrender.com/admin/:path*
       - type: rewrite
         source: /*
         destination: /index.html

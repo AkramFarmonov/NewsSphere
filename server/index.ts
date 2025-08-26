@@ -1,9 +1,21 @@
 import express, { type Request, Response, NextFunction } from "express";
 import session from "express-session";
+import cors from "cors";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 
 const app = express();
+
+// CORS sozlamalari - frontend'dan backend'ga kirish uchun
+app.use(cors({
+  origin: process.env.NODE_ENV === 'production' 
+    ? ['https://realnews.uz', 'https://realnews-frontend.onrender.com'] 
+    : ['http://localhost:5000', 'http://localhost:5173'],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Cookie']
+}));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 

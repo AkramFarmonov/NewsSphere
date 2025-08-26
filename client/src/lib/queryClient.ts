@@ -7,12 +7,24 @@ async function throwIfResNotOk(res: Response) {
   }
 }
 
+function getBaseUrl(): string {
+  // Production'da backend servisining URL'ini ishlatamiz
+  if (import.meta.env.PROD) {
+    return "https://realnews-backend.onrender.com";
+  }
+  // Development'da local server
+  return "";
+}
+
 export async function apiRequest(
   method: string,
   url: string,
   data?: unknown | undefined,
 ): Promise<Response> {
-  const res = await fetch(url, {
+  const baseUrl = getBaseUrl();
+  const fullUrl = baseUrl + url;
+  
+  const res = await fetch(fullUrl, {
     method,
     headers: data ? { "Content-Type": "application/json" } : {},
     body: data ? JSON.stringify(data) : undefined,
@@ -54,7 +66,8 @@ export const getQueryFn: <T>(options: {
     
     // Add query parameters to URL
     const queryString = queryParams.toString();
-    const finalUrl = queryString ? `${url}?${queryString}` : url;
+    const baseUrl = getBaseUrl();
+    const finalUrl = queryString ? `${baseUrl}${url}?${queryString}` : `${baseUrl}${url}`;
     
     const res = await fetch(finalUrl, {
       credentials: "include",
