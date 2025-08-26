@@ -10,6 +10,18 @@ The platform is built with a React frontend using TypeScript, Express.js backend
 
 Preferred communication style: Simple, everyday language.
 
+## Recent Changes
+
+### Migration from Replit Agent (August 26, 2025)
+- Successfully migrated project from Replit Agent to standard Replit environment
+- Fixed database schema type mismatches and added missing fields (email, role, isActive to users table)
+- Added title, description, content fields to articles table for proper content management
+- Created extended types for storage interface (ArticleWithCategory, CategoryWithCount, StoryWithCategory, StoryWithItems)
+- Ran database migration (`drizzle-kit push`) to create all necessary PostgreSQL tables
+- Application now running successfully with proper database integration
+- Admin user creation working correctly
+- All API endpoints functioning properly
+
 ## System Architecture
 
 ### Frontend Architecture

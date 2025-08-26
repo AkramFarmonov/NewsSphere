@@ -1,0 +1,51 @@
+1-Muammo (Eng Asosiy): Ma'lumotlar Bazasida Jadvallar Mavjud Emas
+Logdagi Xatolik: Error creating admin user: PostgresError: relation "users" does not exist
+
+Tahlil: Bu eng asosiy muammo. Xatolik shuni anglatadiki, Render'dagi yangi, toza PostgreSQL bazamizda users, articles kabi jadvallar hali yaratilmagan. Dastur esa bu jadvallarga yozishga harakat qilib, xatolikka uchramoqda.
+
+Yechim: Drizzle Migration'ni Ishga Tushirish
+
+Buning yechimi — Drizzle Migration'ni ishga tushirish. Bu buyruq sizning schema.ts faylingizni o'qib, kerakli barcha jadvallarni ma'lumotlar bazasida avtomatik yaratib beradi. Buni Render'da to'g'ri yo'lga qo'yish uchun:
+
+Loyihangizning asosiy package.json fayliga scripts bo'limiga yangi buyruq qo'shing:
+
+JSON
+
+"scripts": {
+  // ... boshqa skriptlar
+  "db:push": "drizzle-kit push" // Drizzle v.0.30+ uchun
+  // yoki eski versiya bo'lsa "drizzle-kit push:pg"
+},
+Endi Render'dagi "realnews-backend" servisining "Settings" bo'limiga kiring.
+
+"Build Command" maydonini toping va uni quyidagicha o'zgartiring:
+
+Bash
+
+npm install && npm run db:push && npm run build
+Bu o'zgarish har safar deploy bo'lganda, avval bazada jadvallar borligini tekshiradi va kerak bo'lsa yaratadi, shundan keyingina loyihani "build" qiladi.
+
+2-Muammo: RSS Manbalari Eskirgan yoki Noto'g'ri
+Logdagi Xatolik: Error fetching RSS feed from https://kun.uz/rss: Error: HTTP error! status: 404
+
+Tahlil: kun.uz/rss va uza.uz/rss manzillari 404 Not Found (Manzil topilmadi) xatosi qaytarmoqda. Bu degani, bu saytlar o'zlarining RSS manzillarini o'zgartirgan yoki o'chirib yuborgan.
+
+Yechim: Admin Panel Orqali Manbalarni Yangilash
+
+Admin panelingizga kiring.
+
+"RSS Feedlar" bo'limiga o'ting.
+
+Ishlamayotgan Kun.uz va UzA.uz manbalarini o'chirib tashlang yoki ularning yangi, ishlaydigan RSS manzillari bilan almashtiring. (Masalan, Daryo.uz uchun to'g'ri manzil, ehtimol, https://daryo.uz/feed).
+
+3-Muammo (Tavsiya): Production Uchun Session Store
+Logdagi Ogohlantirish: Warning: connect.session() MemoryStore is not designed for a production environment...
+
+Tahlil: Bu xatolik emas, ogohlantirish. Hozirda foydalanuvchi sessiyalari (kim admin bo'lib kirgani) vaqtinchalik xotirada saqlanmoqda. Bu server har safar qayta ishga tushganda (masalan, deploy'dan keyin) admin qaytadan login qilishi kerak degani.
+
+Yechim (Kelajak uchun): Asosiy muammolar hal bo'lgach, biz connect-redis yoki connect-pg-simple kabi kutubxonalardan foydalanib, sessiyalarni PostgreSQL yoki Redis'da saqlashga o'tkazishimiz mumkin. Hozir bu shoshilinch emas.
+
+Xulosa va Keyingi Harakatlar Rejasi:
+Birinchi navbatda, package.json va Render'dagi "Build Command"ni o'zgartirib, Drizzle Migration'ni sozlang va loyihani qayta deploy qiling. Bu 1-muammoni hal qilishi kerak.
+
+Ikkinchidan, Admin panel orqali ishlamayotgan RSS manzillarini yangilang.
