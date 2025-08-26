@@ -44,9 +44,13 @@ export default function Header() {
             {/* Logo */}
             <Link href="/" className="flex items-center space-x-2 sm:space-x-3" data-testid="link-logo">
               <img 
-                src="/logo.png?v=2" 
+                src="/logo.png" 
                 alt="RealNews" 
                 className="h-8 sm:h-10 w-auto"
+                onError={(e) => {
+                  // Fallback for logo loading
+                  e.currentTarget.style.display = 'none';
+                }}
               />
               <div className="text-xl sm:text-2xl font-bold text-primary">
                 RealNews

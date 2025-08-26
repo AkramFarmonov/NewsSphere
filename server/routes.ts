@@ -811,6 +811,33 @@ Crawl-delay: 1`;
     });
   });
 
+  // Serve service worker with proper headers for push notifications
+  app.get("/sw.js", async (_req, res) => {
+    try {
+      const path = await import('path');
+      const fs = await import('fs');
+      
+      res.setHeader('Content-Type', 'application/javascript');
+      res.setHeader('Service-Worker-Allowed', '/');
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+      
+      // In production, serve from dist/public, in development serve from client
+      const isDev = process.env.NODE_ENV === 'development';
+      const swPath = isDev 
+        ? path.resolve(path.dirname(import.meta.dirname), 'client', 'sw.js')
+        : path.resolve(path.dirname(import.meta.dirname), 'dist', 'public', 'sw.js');
+      
+      if (fs.existsSync(swPath)) {
+        res.sendFile(swPath);
+      } else {
+        res.status(404).send('// Service Worker not found');
+      }
+    } catch (error) {
+      console.error('Error serving service worker:', error);
+      res.status(500).send('// Service Worker error');
+    }
+  });
+
   // Register image routes
   registerImageRoutes(app);
 
