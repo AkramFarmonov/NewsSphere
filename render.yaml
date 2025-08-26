@@ -20,11 +20,11 @@ services:
     staticPublishPath: ./dist/public
     routes:
       - type: rewrite
-        source: /api/*
-        destination: https://realnews-backend.onrender.com/api/*
+        source: /api/:path*
+        destination: https://realnews-backend.onrender.com/api/:path*
       - type: rewrite
-        source: /admin/*
-        destination: https://realnews-backend.onrender.com/admin/*
+        source: /admin/:path*
+        destination: https://realnews-backend.onrender.com/admin/:path*
       - type: rewrite
         source: /*
         destination: /index.html

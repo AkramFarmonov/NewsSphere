@@ -1,0 +1,50 @@
+Hozirgi asosiy muammo — routing, ya'ni realnews.uz domeniga kelgan so'rovlarni to'g'ri taqsimlash.
+
+Siz qilishingiz kerak bo'lgan ish: Render'da Rewrite qoidalarini to'g'rilash.
+
+Buning ikki yo'li bor. O'zingizga qulay bo'lgan bittasini tanlang.
+
+A Variant (Tavsiya etiladi): render.yaml fayli orqali
+Bu eng to'g'ri va barqaror usul, chunki barcha sozlamalar kodingiz bilan birga saqlanadi.
+
+Loyihangizning asosiy papkasida joylashgan render.yaml faylini oching.
+
+Uning ichida static turidagi (bu sizning frontend'ingiz) servisingiz uchun routes bo'limi borligiga va u quyidagicha to'g'ri yozilganiga ishonch hosil qiling. Agar yo'q bo'lsa, qo'shing yoki tahrirlang:
+
+YAML
+
+services:
+  # ... (sizning backend servisingiz shu yerda bo'lishi mumkin)
+
+  - type: static
+    name: NewsSphere-1   # Sizning frontend servisingiz nomi
+    # ... (boshqa sozlamalar: rootDir, buildCommand, etc.)
+
+    # ENG MUHIM QISM MANA SHU YERDA
+    routes:
+      - type: rewrite
+        source: /api/:path*
+        destination: https://NewsSphere.onrender.com/api/:path* # SIZNING BACKEND MANZILINGIZ
+
+      - type: rewrite
+        source: /admin/:path*
+        destination: https://NewsSphere.onrender.com/admin/:path* # SIZNING BACKEND MANZILINGIZ
+Diqqat: destination: manzilidagi https://NewsSphere.onrender.com o'rniga o'zingizning backend servisingizning aniq manzilini yozishingiz kerak.
+
+Shu o'zgarishlarni kiritib, kodingizni GitHub'ga push qiling. Render bu faylni avtomatik o'qib, sozlamalarni o'zi yangilaydi.
+
+B Variant (Alternativ): Render Dashboard Orqali
+Agar render.yaml faylini o'zgartirishni xohlamasangiz, buni qo'lda ham qilish mumkin:
+
+Render Dashboard'iga kiring.
+
+Loyihangizning frontend (Static Site) servisiga bosing.
+
+Chap menyudan "Redirects/Rewrites" bo'limini toping.
+
+U yerga yuqoridagi kabi ikkita Rewrite qoidasini qo'lda kiriting:
+
+1-Qoida: Source path: /api/* -> Destination URL: https://[sizning-backend-manzilingiz].onrender.com
+
+2-Qoida: Source path: /admin/* -> Destination URL: https://[sizning-backend-manzilingiz].onrender.com
+

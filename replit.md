@@ -23,6 +23,16 @@ Preferred language: O'zbek tili (Uzbek language).
 - Admin user creation working correctly
 - All API endpoints functioning properly
 
+### Render Deployment Configuration (August 26, 2025)
+- Created comprehensive render.yaml configuration for production deployment
+- Configured separate services: realnews-backend (Web Service) and realnews-frontend (Static Site)
+- Fixed routing issues with proper rewrite rules using `:path*` syntax
+- Set up API and admin panel routing from frontend to backend service
+- Created _redirects files as backup routing configuration
+- Admin credentials: username = Akramjon, password = Gisobot201415*
+- Database populated with 85+ real articles from RSS feeds (Daryo.uz, Sky News)
+- All production build commands optimized for Render deployment
+
 ## System Architecture
 
 ### Frontend Architecture

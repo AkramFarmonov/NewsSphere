@@ -1,9 +1,8 @@
 # API requests should be proxied to backend service
 /api/* https://realnews-backend.onrender.com/api/:splat 200!
 
-# Admin panel auth and functionality  
-/admin/api/* https://realnews-backend.onrender.com/admin/api/:splat 200!
-/admin https://realnews-backend.onrender.com/admin 200!
+# Admin requests should be proxied to backend service  
+/admin/* https://realnews-backend.onrender.com/admin/:splat 200!
 
 # Service Worker and PWA files
 /sw.js /sw.js 200
