@@ -44,12 +44,15 @@ export default function Header() {
             {/* Logo */}
             <Link href="/" className="flex items-center space-x-2 sm:space-x-3" data-testid="link-logo">
               <img 
-                src="/logo.png" 
+                src={`/logo.png?v=${Date.now()}`} 
                 alt="RealNews" 
                 className="h-8 sm:h-10 w-auto"
+                style={{ display: 'inline-block' }}
+                onLoad={() => console.log('Logo loaded successfully')}
                 onError={(e) => {
-                  // Fallback for logo loading
-                  e.currentTarget.style.display = 'none';
+                  console.log('Logo failed to load:', e);
+                  // Keep the image visible, just show a border for debugging
+                  e.currentTarget.style.border = '2px solid red';
                 }}
               />
               <div className="text-xl sm:text-2xl font-bold text-primary">
