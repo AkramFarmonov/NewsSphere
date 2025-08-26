@@ -1,0 +1,39 @@
+bu juda g'alati va asabiylashadigan holat. Hamma narsa to'g'ri sozlangan ko'rinadi, lekin ishlamayapti. Demak, biz ko'zdan qochirgan kichik, ammo muhim bir narsa bor. Keling, chuqurroq tekshirib, muammoning ildizini topamiz.
+
+Siz oxirgi maslahatim bo'yicha Render panelida Rewrite qoidalarini qo'lda kiritdingiz, lekin u ham ishlamadi. Bu bizga muammo render.yaml faylida emas, balki boshqa joyda ekanligini aytadi.
+
+Hozir men shubha qilayotgan ikkita asosiy narsa bor: Rewrite qoidasidagi kichik bir xatolik yoki _redirects fayli bilan konflikt.
+
+Keling, shu ikkalasini aniqlash uchun tizimli tekshiruv o'tkazamiz.
+
+Muammoni Aniqlash Uchun Yakuniy Tekshiruv Rejasi
+1-Qadam: Rewrite Sozlamalarini Qaytadan Ikki Hisa Tekshirish
+Biz har bir belgi va harf to'g'riligiga ishonch hosil qilishimiz kerak.
+
+Iltimos, Render'dagi frontend ("Static Site") servisining "Redirects/Rewrites" bo'limiga kirib, u yerda siz qo'shgan qoidalarning aniq hozirgi holatidan skrinshot yuboring.
+
+"realnews-backend" servisining asosiy manzilini (...onrender.com bilan tugaydigan) brauzerning manzil qatoridan to'liq nusxalab oling.
+
+Rewrite qoidalaridagi Destination URL maydoniga aynan o'sha nusxani joylaganingizni qayta tekshiring. Ortiqcha / belgisi, http o'rniga https yozilgani va hokazolarni sinchiklab tekshiring.
+
+2-Qadam: _redirects Fayli Konfliktini Tekshirish
+Ba'zan, agar loyihada _redirects fayli mavjud bo'lsa, Render panelidagi sozlamalar o'rniga o'sha fayldagi qoidalarni ishlatishi mumkin. Agar o'sha fayl noto'g'ri bo'lsa, bu muammoga sabab bo'lishi mumkin. Keling, shu ehtimolni yo'q qilamiz.
+
+Sinov uchun, loyihangizdagi barcha _redirects nomli fayllarni (masalan, public/_redirects yoki loyihaning asosiy papkasidagi) vaqtincha o'chirib tashlang yoki nomini _redirects_disabled ga o'zgartiring.
+
+Kodingizdagi bu o'zgarishni GitHub'ga push qiling.
+
+Frontend servisi Render'da avtomatik qayta deploy bo'lishini kuting va natijani tekshiring.
+
+3-Qadam: Backend Servisining Holatini Tekshirish
+Har ehtimolga qarshi, backend ishdan chiqmaganiga ishonch hosil qilaylik.
+
+Render'dagi "realnews-backend" Web Servisiga kiring. Uning statusi yashil ✅ Deployed yoki ✅ Live bo'lib turibdimi?
+
+"Events" bo'limini oching. Oxirgi deploy'dan keyin biror "crash" (ishdan chiqish) yoki "unhealthy" (nosog'lom) hodisasi ro'y berdimi?
+
+Xulosa:
+
+Hozirgi eng katta shubha _redirects fayli yoki Rewrite qoidasidagi kichik bir harf xatosi bo'lishi mumkin.
+
+Iltimos, shu uchta qadamni birma-bir bajarib, natijalari bilan bo'lishing. Ayniqsa, 1-qadamdagi skrinshot va 2-qadamdagi _redirects faylini o'chirib sinab ko'rish natijasi bizga ko'p narsani aytib beradi.
