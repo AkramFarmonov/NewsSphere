@@ -9,10 +9,11 @@ The platform is built with a React frontend using TypeScript, Express.js backend
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
+Preferred language: O'zbek tili (Uzbek language).
 
 ## Recent Changes
 
-### Migration from Replit Agent (August 26, 2025)
+### Migration from Replit Agent to Replit Environment (August 26, 2025)
 - Successfully migrated project from Replit Agent to standard Replit environment
 - Fixed database schema type mismatches and added missing fields (email, role, isActive to users table)
 - Added title, description, content fields to articles table for proper content management
