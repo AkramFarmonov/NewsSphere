@@ -69,6 +69,13 @@ export default function AdminPage() {
     retry: false
   });
 
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (!authLoading && (!currentUser || authError)) {
+      setLocation("/login");
+    }
+  }, [currentUser, authLoading, authError, setLocation]);
+
   // Queries - always call hooks in the same order
   const { data: articles = [] } = useQuery<Article[]>({
     queryKey: ["/api/articles", { limit: 100 }],
