@@ -1,0 +1,39 @@
+I've analyzed the deployment log. The build process itself was successful, but it failed at the very last step. The problem is a mismatch between where your files are being built and where Render is looking for them.
+
+This is a common issue when deploying monorepo (multi-folder) projects.
+
+Muammo Tahlili (Nima Sodir Bo'ldi?)
+Render's Location: Your Static Site service has its "Root Directory" set to client. This means Render first "enters" the client directory (cd client) before doing anything else.
+
+Build Command's Output: The npm run build command you are using is likely the one from your main package.json. The log shows that this command creates the final frontend files here: ../dist/public/. The ../ means it's creating the dist folder outside the client directory, at the project's root level.
+
+The Conflict: After the build, Render is still inside the client directory. Your "Publish Directory" is set to dist. Render tries to find a folder at client/dist, but that folder doesn't exist because the files were created at the root level (/dist/public). This causes the "Publish directory dist does not exist!" error.
+
+Eng To'g'ri Yechim: Sozlamalarni Monorepoga Moslashtirish
+We need to tell the Static Site service to only build the client code and to do it inside the client directory.
+
+1. Kodga Kichik O'zgartirish Kiritish (client/package.json)
+Loyihangizning client/package.json faylini oching. Agar unda scripts bo'limi bo'lmasa, uni qo'shing yoki mavjud bo'lsa, build skriptini qo'shing/o'zgartiring. U quyidagicha ko'rinishda bo'lishi kerak:
+
+JSON
+
+{
+  // ... boshqa sozlamalar
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build", // SHU QATOR MUHIM
+    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "preview": "vite preview"
+  },
+  // ... boshqa sozlamalar
+}
+Bu o'zgarish client papkasini o'zini-o'zi "build" qilishga o'rgatadi.
+
+2. Render Sozlamalarini To'g'rilash
+Endi Render'dagi "realnews-frontend" (Static Site) servisining sozlamalariga kiring va ularni quyidagicha to'g'rilang:
+
+Root Directory: client (Bu o'zgarishsiz qoladi, to'g'ri)
+
+Build Command: npm install && npm run build (Endi bu client papkasidagi build skriptini ishlatadi)
+
+Publish Directory: dist (Bu ham to'g'ri, chunki vite build natijalarni client/dist papkasiga soladi)
