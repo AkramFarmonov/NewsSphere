@@ -9,7 +9,7 @@ const app = express();
 // CORS sozlamalari - frontend'dan backend'ga kirish uchun
 app.use(cors({
   origin: process.env.NODE_ENV === 'production' 
-    ? ['https://realnews.uz', 'https://realnews-frontend.onrender.com'] 
+    ? ['https://realnews.uz', 'https://realnews.onrender.com'] 
     : ['http://localhost:5000', 'http://localhost:5173'],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],

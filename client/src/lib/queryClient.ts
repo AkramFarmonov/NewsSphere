@@ -8,11 +8,8 @@ async function throwIfResNotOk(res: Response) {
 }
 
 function getBaseUrl(): string {
-  // Production'da backend servisining URL'ini ishlatamiz
-  if (import.meta.env.PROD) {
-    return "https://realnews-backend.onrender.com";
-  }
-  // Development'da local server
+  // Production'da ham development'dagi kabi local server ishlatamiz
+  // Chunki backend va frontend bir xil hostda serve bo'ladi
   return "";
 }
 
