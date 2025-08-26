@@ -48,22 +48,15 @@ export function useWeatherData() {
         const currentWeatherCode = data.current.weather_code;
         const dailyTemps = data.daily.temperature_2m_max;
         
-        // Hozirgi vaqtga mos haroratni olish (kun davomida yuqori harorat)
-        const now = new Date();
-        const hour = now.getHours();
-        let displayTemp = currentTemp;
+        // Faqat hozirgi haroratni ishlatamiz (API real-time ma'lumot beradi)
+        const displayTemp = currentTemp;
         
-        // Agar kun vaqti bo'lsa, hozirgi soatdagi haroratni olish
-        if (hour >= 6 && hour <= 22 && data.hourly && data.hourly.temperature_2m) {
-          const hourlyTemps = data.hourly.temperature_2m;
-          const hourlyTimes = data.hourly.time;
-          const currentTimeStr = now.toISOString().slice(0, 13) + ':00';
-          const currentHourIndex = hourlyTimes.findIndex((time: string) => time.startsWith(currentTimeStr.slice(0, 13)));
-          
-          if (currentHourIndex >= 0) {
-            displayTemp = hourlyTemps[currentHourIndex];
-          }
-        }
+        console.log('Weather debug:', {
+          currentTemp,
+          displayTemp,
+          weatherCode: currentWeatherCode,
+          time: new Date().toISOString()
+        });
         
         setWeather({
           temperature: Math.round(displayTemp),
@@ -88,8 +81,8 @@ export function useWeatherData() {
     };
 
     fetchWeather();
-    // Har 10 daqiqada yangilash
-    const interval = setInterval(fetchWeather, 10 * 60 * 1000);
+    // Har 5 daqiqada yangilash (tezroq yangilanish)
+    const interval = setInterval(fetchWeather, 5 * 60 * 1000);
     
     return () => clearInterval(interval);
   }, []);
