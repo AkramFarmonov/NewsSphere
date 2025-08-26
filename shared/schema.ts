@@ -6,7 +6,11 @@ import { z } from "zod";
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   username: text("username").notNull().unique(),
+  email: text("email").notNull().unique(),
   password: text("password").notNull(),
+  role: text("role").default("user").notNull(),
+  isActive: text("is_active").default("true").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
 export const categories = pgTable("categories", {
@@ -20,6 +24,9 @@ export const categories = pgTable("categories", {
 
 export const articles = pgTable("articles", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  title: text("title").notNull(),
+  description: text("description"),
+  content: text("content"),
   slug: text("slug").notNull().unique(),
   imageUrl: text("image_url"),
   imageAttribution: text("image_attribution"), // "Photo by John Doe on Unsplash"
@@ -104,9 +111,9 @@ export const storyItems = pgTable("story_items", {
   createdAt: timestamp("created_at").defaultNow().notNull()
 });
 
-export const insertUserSchema = createInsertSchema(users).pick({
-  username: true,
-  password: true,
+export const insertUserSchema = createInsertSchema(users).omit({
+  id: true,
+  createdAt: true,
 });
 
 export const insertCategorySchema = createInsertSchema(categories).omit({
@@ -179,3 +186,9 @@ export type InsertStory = z.infer<typeof insertStorySchema>;
 
 export type StoryItem = typeof storyItems.$inferSelect;
 export type InsertStoryItem = z.infer<typeof insertStoryItemSchema>;
+
+// Extended types for storage interface
+export type ArticleWithCategory = Article & { category: Category };
+export type CategoryWithCount = Category & { articleCount: number };
+export type StoryWithCategory = Story & { category?: Category };
+export type StoryWithItems = Story & { items: StoryItem[]; category?: Category };

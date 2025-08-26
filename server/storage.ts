@@ -295,7 +295,11 @@ export class MemStorage implements IStorage {
 
   async createUser(insertUser: InsertUser): Promise<User> {
     const id = randomUUID();
-    const user: User = { ...insertUser, id };
+    const user: User = { 
+      ...insertUser,
+      id,
+      createdAt: new Date()
+    };
     this.users.set(id, user);
     return user;
   }
@@ -644,6 +648,10 @@ export class MemStorage implements IStorage {
     const story: Story = {
       id,
       ...data,
+      description: data.description ?? null,
+      categoryId: data.categoryId ?? null,
+      thumbnail: data.thumbnail ?? null,
+      expiresAt: data.expiresAt ?? null,
       isActive: data.isActive || "true",
       order: data.order || 0,
       viewCount: 0,
@@ -692,6 +700,10 @@ export class MemStorage implements IStorage {
     const item: StoryItem = {
       id,
       ...data,
+      title: data.title ?? null,
+      content: data.content ?? null,
+      articleId: data.articleId ?? null,
+      mediaUrl: data.mediaUrl ?? null,
       type: data.type || "image",
       duration: data.duration || 5,
       order: data.order || 0,
@@ -730,6 +742,7 @@ export class MemStorage implements IStorage {
     const translation: ArticleTranslation = {
       id,
       ...data,
+      description: data.description ?? null,
       createdAt: new Date()
     };
     this.articleTranslations.set(id, translation);
