@@ -671,6 +671,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+
   // Update article (full edit)
   app.put("/api/admin/articles/:id", requireAdmin, async (req, res) => {
     try {
