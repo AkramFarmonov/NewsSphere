@@ -10,6 +10,7 @@
   "scope": "/",
   "lang": "uz",
   "categories": ["news", "lifestyle", "productivity"],
+  "permissions": ["notifications"],
   "icons": [
     {
       "src": "/icon-192.png",

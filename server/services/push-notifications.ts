@@ -9,18 +9,22 @@ export class PushNotificationService {
     this.setupWebPush();
   }
 
-  private setupWebPush() {
-    // VAPID kalitlari - production'da environment variable'lardan olinadi
-    const vapidKeys = {
-      publicKey: process.env.VAPID_PUBLIC_KEY || 'BEl62iUYgUivxIkv69yViEuiBIa40HI80NlQpHBJcHdnL2q0uYDLK5FE7s8-Y3KD0q8lzn5kNOGqXs8oBjGNjD8',
-      privateKey: process.env.VAPID_PRIVATE_KEY || 'dUiDdw3fEg4mBFAiXvPONtHdC1Z0n-OUhWMPJ3l8SYc'
-    };
+  private vapidKeys = {
+    publicKey: process.env.VAPID_PUBLIC_KEY || 'BEl62iUYgUivxIkv69yViEuiBIa40HI80NlQpHBJcHdnL2q0uYDLK5FE7s8-Y3KD0q8lzn5kNOGqXs8oBjGNjD8',
+    privateKey: process.env.VAPID_PRIVATE_KEY || 'dUiDdw3fEg4mBFAiXvPONtHdC1Z0n-OUhWMPJ3l8SYc'
+  };
 
+  private setupWebPush() {
     webpush.setVapidDetails(
       'mailto:admin@realnews.uz',
-      vapidKeys.publicKey,
-      vapidKeys.privateKey
+      this.vapidKeys.publicKey,
+      this.vapidKeys.privateKey
     );
+  }
+
+  // Frontend uchun VAPID public key'ni qaytarish
+  getVapidPublicKey(): string {
+    return this.vapidKeys.publicKey;
   }
 
   // Barcha aktiv obunachilarga xabar yuborish
@@ -79,10 +83,5 @@ export class PushNotificationService {
       url: `/article/${article.slug}`,
       icon: '/icon-192.png'
     });
-  }
-
-  // VAPID public key'ni olish (frontend uchun)
-  getVapidPublicKey(): string {
-    return process.env.VAPID_PUBLIC_KEY || 'BEl62iUYgUivxIkv69yViEuiBIa40HI80NlQpHBJcHdnL2q0uYDLK5FE7s8-Y3KD0q8lzn5kNOGqXs8oBjGNjD8';
   }
 }
