@@ -9,9 +9,10 @@ import { insertNewsletterSchema, insertUserSchema, insertPushSubscriptionSchema,
 import { z } from "zod";
 import { registerImageRoutes } from "./routes/images";
 import { PushNotificationService } from "./services/push-notifications";
+import bcrypt from "bcryptjs";
 
-// Use memory storage temporarily for demo purposes
-const storage = new MemStorage();
+// Use database storage for production, memory storage for development
+const storage = process.env.NODE_ENV === 'production' ? new DbStorage() : new MemStorage();
 const authService = new AuthService(storage as any);
 const pushService = new PushNotificationService(storage as any);
 
@@ -33,6 +34,17 @@ const paginationSchema = z.object({
 });
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  
+  // Initialize database in production
+  if (process.env.NODE_ENV === 'production') {
+    try {
+      console.log('Initializing production database...');
+      await (storage as DbStorage).initializeDatabase();
+      console.log('Production database initialized successfully');
+    } catch (error) {
+      console.error('Failed to initialize production database:', error);
+    }
+  }
   
   // Authentication routes
   app.post("/api/auth/register", async (req, res) => {
@@ -843,6 +855,19 @@ Crawl-delay: 1`;
 
   const httpServer = createServer(app);
   
+  // Fetch RSS feeds immediately after initialization in production
+  if (process.env.NODE_ENV === 'production') {
+    setTimeout(async () => {
+      try {
+        console.log("Starting initial RSS feed fetch in production...");
+        await rssParser.fetchAllFeeds();
+        console.log("Initial RSS feed fetch completed");
+      } catch (error) {
+        console.error("Error during initial RSS fetch:", error);
+      }
+    }, 5000); // Wait 5 seconds for server to fully start
+  }
+
   // Set up periodic RSS fetching (every 30 minutes)
   setInterval(async () => {
     try {

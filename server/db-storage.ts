@@ -15,6 +15,8 @@ import {
   type StoryWithItems, type StoryWithCategory
 } from "@shared/schema";
 import type { IStorage } from "./storage";
+import bcrypt from "bcryptjs";
+import { randomUUID } from "crypto";
 
 export class DbStorage implements IStorage {
   private db: ReturnType<typeof drizzle>;
@@ -27,6 +29,111 @@ export class DbStorage implements IStorage {
     const connectionString = process.env.DATABASE_URL;
     const client = postgres(connectionString);
     this.db = drizzle(client);
+  }
+
+  // Initialize database with default data
+  async initializeDatabase(): Promise<void> {
+    try {
+      // First create admin user
+      await this.initializeAdminUser();
+      
+      // Check if categories already exist
+      const existingCategories = await this.getAllCategories();
+      
+      if (existingCategories.length > 0) {
+        console.log("Database already has categories. Skipping initialization.");
+        return;
+      }
+
+      console.log("Creating default categories...");
+      // Create default categories
+      const defaultCategories = [
+        { name: "O'zbekiston", slug: "ozbekiston", icon: "fas fa-flag", color: "#1a365d" },
+        { name: "Dunyo", slug: "dunyo", icon: "fas fa-globe", color: "#2d3748" },
+        { name: "Sport", slug: "sport", icon: "fas fa-futbol", color: "#16a085" },
+        { name: "Texnologiya", slug: "texnologiya", icon: "fas fa-microchip", color: "#3182ce" },
+        { name: "Iqtisodiyot", slug: "iqtisodiyot", icon: "fas fa-chart-line", color: "#d69e2e" },
+        { name: "Madaniyat", slug: "madaniyat", icon: "fas fa-theater-masks", color: "#805ad5" },
+        { name: "Siyosat", slug: "siyosat", icon: "fas fa-landmark", color: "#2b6cb0" }
+      ];
+
+      const createdCategories: Category[] = [];
+      for (const categoryData of defaultCategories) {
+        const category = await this.createCategory(categoryData);
+        createdCategories.push(category);
+        console.log(`Created category: ${category.name}`);
+      }
+
+      console.log("Creating RSS feeds...");
+      // Create RSS feeds
+      const rssFeeds = [
+        // O'zbekiston
+        { url: "https://kun.uz/rss", name: "Kun.uz", categorySlug: "ozbekiston" },
+        { url: "https://uza.uz/rss", name: "UzA", categorySlug: "ozbekiston" },
+        
+        // Dunyo (working RSS feeds)
+        { url: "https://feeds.skynews.com/feeds/rss/world.xml", name: "Sky News World", categorySlug: "dunyo" },
+        { url: "https://feeds.reuters.com/reuters/worldNews", name: "Reuters World", categorySlug: "dunyo" },
+        
+        // Sport
+        { url: "https://www.championat.com/rss/news.xml", name: "Championat.com", categorySlug: "sport" },
+        
+        // Texnologiya
+        { url: "https://feeds.techcrunch.com/TechCrunch/", name: "TechCrunch", categorySlug: "texnologiya" },
+        { url: "https://feeds.reuters.com/reuters/technologyNews", name: "Reuters Tech", categorySlug: "texnologiya" },
+        
+        // Iqtisodiyot
+        { url: "https://feeds.finance.yahoo.com/rss/2.0/headline", name: "Yahoo Finance", categorySlug: "iqtisodiyot" }
+      ];
+
+      for (const feedData of rssFeeds) {
+        const category = createdCategories.find(cat => cat.slug === feedData.categorySlug);
+        if (category) {
+          await this.createRssFeed({
+            url: feedData.url,
+            name: feedData.name,
+            categoryId: category.id,
+            isActive: "true"
+          });
+          console.log(`Created RSS feed: ${feedData.name}`);
+        }
+      }
+
+      console.log("Database initialization completed successfully");
+    } catch (error) {
+      console.error("Error initializing database:", error);
+      throw error;
+    }
+  }
+
+  // Initialize admin user
+  async initializeAdminUser(): Promise<void> {
+    try {
+      // Check if admin user already exists
+      const existingAdmin = await this.getUserByUsername("Akramjon");
+      if (existingAdmin) {
+        console.log("Admin user already exists. Skipping admin creation.");
+        return;
+      }
+
+      // Create admin user with hashed password
+      const hashedPassword = await bcrypt.hash("Gisobot201415*", 12);
+      
+      const adminUser: InsertUser = {
+        id: randomUUID(),
+        username: "Akramjon",
+        email: "admin@realnews.uz",
+        password: hashedPassword,
+        role: "admin",
+        isActive: "true"
+      };
+
+      await this.createUser(adminUser);
+      console.log("Admin user created: username = Akramjon");
+    } catch (error) {
+      console.error("Error creating admin user:", error);
+      throw error;
+    }
   }
 
   // User methods
