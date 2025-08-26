@@ -1,0 +1,72 @@
+Yakuniy Konfiguratsiya Rejasi ("Foolproof" Plan)
+Biz barcha murakkab buyruqlardan voz kechamiz va monorepo uchun eng to'g'ri, standart usulni qo'llaymiz.
+
+1-Qadam: Asosiy package.json faylini yangilash
+Loyihangizning eng asosiy (ildiz) papkasidagi package.json faylini oching va uning mazmunini to'liq quyidagi bilan almashtiring. Bu bizga toza va to'g'ri boshlanish beradi.
+
+JSON
+
+{
+  "name": "realnews-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "client",
+    "server",
+    "shared"
+  ],
+  "scripts": {
+    "dev": "npm run dev -w server",
+    "build": "npm run build -w client && npm run build -w server",
+    "start": "npm start -w server"
+  },
+  "dependencies": {
+    // Bu yerda faqat kerak bo'lsa, umumiy kutubxonalar bo'lishi mumkin
+  }
+}
+2-Qadam: server/package.json faylini yangilash
+Endi server papkasidagi package.json faylini oching va scripts qismi quyidagicha ekanligiga ishonch hosil qiling:
+
+JSON
+
+{
+  "name": "server",
+  // ...
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "esbuild src/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist",
+    "start": "node dist/index.js"
+  },
+  // ...
+}
+3-Qadam: client/package.json faylini tekshirish
+client papkasidagi package.json faylida build skripti quyidagicha ekanligini tekshiring:
+
+JSON
+
+{
+  "name": "client",
+  // ...
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "preview": "vite preview"
+  },
+  // ...
+}
+4-Qadam: Render Sozlamalarini Yangilash
+Endi Render'dagi realnews-backend (Web Service) servisingizning sozlamalariga kiring va ularni quyidagicha o'rnating:
+
+Root Directory: (bo'sh qoldiring)
+
+Build Command: npm install && npm run build
+
+Start Command: npm run start
+
+Nima O'zgardi?
+Biz har bir qismga (client, server) o'zini "build" qilish mas'uliyatini yukladik.
+
+Asosiy package.json endi shunchaki orkestr dirijyori: u kerakli qismlarga "build qil" yoki "ishga tush" deb buyruq beradi (npm run build -w client).
+
+Render sozlamalari endi juda oddiy va tushunarli.
