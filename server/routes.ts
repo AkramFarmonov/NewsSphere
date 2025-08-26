@@ -11,8 +11,8 @@ import { registerImageRoutes } from "./routes/images";
 import { PushNotificationService } from "./services/push-notifications";
 import bcrypt from "bcryptjs";
 
-// Use database storage for production, memory storage for development
-const storage = process.env.NODE_ENV === 'production' ? new DbStorage() : new MemStorage();
+// Always use database storage to persist data
+const storage = new DbStorage();
 const authService = new AuthService(storage as any);
 const pushService = new PushNotificationService(storage as any);
 
@@ -35,15 +35,13 @@ const paginationSchema = z.object({
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
-  // Initialize database in production
-  if (process.env.NODE_ENV === 'production') {
-    try {
-      console.log('Initializing production database...');
-      await (storage as DbStorage).initializeDatabase();
-      console.log('Production database initialized successfully');
-    } catch (error) {
-      console.error('Failed to initialize production database:', error);
-    }
+  // Always initialize database when using DbStorage
+  try {
+    console.log('Initializing database...');
+    await (storage as DbStorage).initializeDatabase();
+    console.log('Database initialized successfully');
+  } catch (error) {
+    console.error('Failed to initialize database:', error);
   }
   
   // Authentication routes
